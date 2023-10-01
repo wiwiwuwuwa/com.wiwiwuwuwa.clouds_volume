@@ -1,0 +1,117 @@
+#pragma kernel CSMain
+#pragma multi_compile_local WIWIW_THREADS_PER_WAVE_32 WIWIW_THREADS_PER_WAVE_64
+
+// --------------------------------------------------------
+
+#include "../../Utilities/Shaders/Library/GetFadeGradient.hlsl"
+#include "../../Utilities/Shaders/Library/GetGlobalBufferCoord3D.hlsl"
+#include "../../Utilities/Shaders/Library/GetLineIntersectPlaneY.hlsl"
+#include "../../Utilities/Shaders/Library/GetPointOnCubemap.hlsl"
+#include "../../Utilities/Shaders/Library/GetRemap.hlsl"
+#include "../../Utilities/Shaders/Library/GetRemapUnclamped.hlsl"
+#include "../../Utilities/Shaders/Library/IsNaN.hlsl"
+#include "../../Utilities/Shaders/Library/WaveFrontMultiCompile.hlsl"
+
+// --------------------------------------------------------
+
+Texture3D<float> _Wiwiw_DensityTexture;
+
+SamplerState sampler_Wiwiw_DensityTexture;
+
+float4x4 _Wiwiw_DensityWorldToObjectMatrix;
+
+Texture3D<float> _Wiwiw_ShadowsTexture;
+
+SamplerState sampler_Wiwiw_ShadowsTexture;
+
+float4x4 _Wiwiw_ShadowsWorldToObjectMatrix;
+
+// x: clouds start pos
+// y: clouds final pos
+// z: unused
+// w: unused
+float4 _Wiwiw_DensityParams;
+
+// x: samples count
+// y: rcp(samples count)
+// z: density
+// w: unused
+float4 _Wiwiw_CubemapParams;
+
+// xyz: sun dir
+// w: unused
+float4 _Wiwiw_SunDir;
+
+RWTexture2D<float4> _Wiwiw_CubemapTexture;
+
+int _Wiwiw_CubemapFaceID;
+
+static const float _Wiwiw_DensityAreaScale = 4.0;
+
+// --------------------------------------------------------
+
+WIWIW_NUMTHREADS
+void CSMain(in uint3 id : SV_DispatchThreadID)
+{
+    float isValid = 1.0;
+
+    const uint2 indexInCube = Wiwiw_GetGlobalBufferIndex3D(id.x).xy;
+    const float2 coordInCube = Wiwiw_GetRemap(Wiwiw_GetGlobalBufferCoord3D(id.x).xy, float2(0.0, 0.0), float2(1.0, 1.0), float2(0.0, 1.0), float2(1.0, 0.0));
+
+    const float3 worldViewPos = 0.0;
+    const float3 worldViewDir = normalize(Wiwiw_GetRemap(Wiwiw_GetPointOnCubemap(coordInCube, _Wiwiw_CubemapFaceID), 0.0, 1.0, -1.0, 1.0));
+    isValid = lerp(isValid, 0.0, worldViewDir.y <= 0.0);
+
+    const float3 worldIntersectLowerPos = Wiwiw_GetLineIntersectPlaneY(worldViewPos, worldViewDir, _Wiwiw_DensityParams.x);
+    const float3 worldIntersectUpperPos = Wiwiw_GetLineIntersectPlaneY(worldViewPos, worldViewDir, _Wiwiw_DensityParams.y);
+    isValid = lerp(isValid, 0.0, Wiwiw_IsNaN(worldIntersectLowerPos) || Wiwiw_IsNaN(worldIntersectUpperPos));
+
+    float color = 0.0;
+    float alpha = 0.0;
+
+    for (float i = 0.0; i < _Wiwiw_CubemapParams.x; i++)
+    {
+        const float3 worldSamplePos = lerp(worldIntersectUpperPos, worldIntersectLowerPos, i * _Wiwiw_CubemapParams.y);
+
+        const float3 densitySamplePos = mul(_Wiwiw_DensityWorldToObjectMatrix, float4(worldSamplePos, 1.0)).xyz;
+        const float1 densitySampleVal = _Wiwiw_DensityTexture.SampleLevel(sampler_Wiwiw_DensityTexture, densitySamplePos, 0.0).r;
+        const float3 densityFadePos = Wiwiw_GetRemapUnclamped(densitySamplePos, 0.0, 1.0, float3(-0.5, 0.0, -0.5) * rcp(_Wiwiw_DensityAreaScale), float3(0.5, 0.5, 0.5) * rcp(_Wiwiw_DensityAreaScale));
+        const float1 densityFadeVal = Wiwiw_GetFadeGradient(densityFadePos, 0.4, 1.0, 0.5, 0.0);
+        const float1 densityTotalVal = densitySampleVal.x * densityFadeVal.x;
+
+        const float3 shadowsSamplePos = mul(_Wiwiw_ShadowsWorldToObjectMatrix, float4(worldSamplePos, 1.0)).xyz;
+        const float1 shadowsSampleVal = _Wiwiw_ShadowsTexture.SampleLevel(sampler_Wiwiw_ShadowsTexture, shadowsSamplePos, 0.0).r;
+        const float3 shadowsFadePos = Wiwiw_GetRemap(shadowsSamplePos, 0.0, 1.0, -0.5, 0.5);
+        const float1 shadowsFadeVal = Wiwiw_GetFadeGradient(shadowsFadePos, 0.0, 1.0, 0.5, 0.0);
+        const float1 shadowsTotalVal = shadowsSampleVal.x * shadowsFadeVal.x;
+
+        color = lerp(color, shadowsTotalVal.x, densityTotalVal.x * _Wiwiw_CubemapParams.z);
+        alpha = lerp(alpha, 1.0, densityTotalVal.x * _Wiwiw_CubemapParams.z);
+    }
+
+    const float3 sunbmSampleStartPos = worldViewPos;
+    const float3 sunbmSampleFinalPos = worldViewPos + _Wiwiw_DensityAreaScale * worldViewDir;
+
+    float sunbm = 0.0;
+
+    for (float j = 0.0; j < _Wiwiw_CubemapParams.x; j++)
+    {
+        const float3 worldSamplePos = lerp(sunbmSampleStartPos, sunbmSampleFinalPos, j * _Wiwiw_CubemapParams.y);
+
+        const float3 shadowsSamplePos = mul(_Wiwiw_ShadowsWorldToObjectMatrix, float4(worldSamplePos, 1.0)).xyz;
+        const float1 shadowsSampleVal = _Wiwiw_ShadowsTexture.SampleLevel(sampler_Wiwiw_ShadowsTexture, shadowsSamplePos, 0.0).r;
+        const float3 shadowsFadePos = Wiwiw_GetRemap(shadowsSamplePos, 0.0, 1.0, -0.5, 0.5);
+        const float1 shadowsFadeVal = Wiwiw_GetFadeGradient(shadowsFadePos, 0.0, 0.0, 0.5, 1.0);
+        const float1 shadowsTotalVal = lerp(shadowsSampleVal.x, 1.0, shadowsFadeVal.x);
+
+        sunbm = lerp(sunbm, 1.0, 0.1 * shadowsTotalVal.x);
+    }
+
+    color = pow(lerp(color, 1.0, pow(saturate(dot(worldViewDir, -_Wiwiw_SunDir.xyz)), 4.0) * (1.0 - pow(saturate(alpha), 8.0))), 2.0);
+    alpha = pow(saturate(alpha), 8.0);
+    sunbm = pow(saturate(sunbm), 48.0);
+
+    _Wiwiw_CubemapTexture[indexInCube] = isValid ? float4(color, alpha, sunbm, 0.0) : float4(0.0, 0.0, sunbm, 0.0);
+}
+
+// --------------------------------------------------------

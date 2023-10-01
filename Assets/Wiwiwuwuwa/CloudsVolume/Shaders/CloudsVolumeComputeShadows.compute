@@ -1,0 +1,75 @@
+#pragma kernel CSMain
+#pragma multi_compile_local WIWIW_THREADS_PER_WAVE_32 WIWIW_THREADS_PER_WAVE_64
+
+// --------------------------------------------------------
+
+#include "../../Utilities/Shaders/Library/GetGlobalBufferCoord3D.hlsl"
+#include "../../Utilities/Shaders/Library/GetLineIntersectPlaneY.hlsl"
+#include "../../Utilities/Shaders/Library/IsNaN.hlsl"
+#include "../../Utilities/Shaders/Library/WaveFrontMultiCompile.hlsl"
+
+// --------------------------------------------------------
+
+Texture3D<float> _Wiwiw_DensityTexture;
+
+SamplerState sampler_Wiwiw_DensityTexture;
+
+float4x4 _Wiwiw_DensityWorldToObjectMatrix;
+
+RWTexture3D<float> _Wiwiw_ShadowsTexture;
+
+float4x4 _Wiwiw_ShadowsObjectToWorldMatrix;
+
+// x: clouds start pos
+// y: clouds final pos
+// z: unused
+// w: unused
+float4 _Wiwiw_DensityParams;
+
+// x: samples count
+// y: rcp(samples count)
+// z: density
+// w: unused
+float4 _Wiwiw_ShadowsParams;
+
+// --------------------------------------------------------
+
+WIWIW_NUMTHREADS
+void CSMain(in uint3 id : SV_DispatchThreadID)
+{
+    float isValid = 1.0;
+
+    const uint3 indexInCube = Wiwiw_GetGlobalBufferIndex3D(id.x);
+    const float3 coordInCube = Wiwiw_GetGlobalBufferCoord3D(id.x);
+
+    const float3 shadowsViewPos = coordInCube;
+    const float3 shadowsViewDir = float3(0.0, 0.0, 1.0);
+
+    const float3 worldViewPos = mul(_Wiwiw_ShadowsObjectToWorldMatrix, float4(shadowsViewPos, 1.0)).xyz;
+    const float3 worldViewDir = mul(_Wiwiw_ShadowsObjectToWorldMatrix, float4(shadowsViewDir, 0.0)).xyz;
+    isValid = lerp(isValid, 0.0, worldViewDir.y > 0.0);
+
+    const float3 worldIntersectLowerPos = Wiwiw_GetLineIntersectPlaneY(worldViewPos, worldViewDir, _Wiwiw_DensityParams.x);
+    const float3 worldIntersectUpperPos = Wiwiw_GetLineIntersectPlaneY(worldViewPos, worldViewDir, _Wiwiw_DensityParams.y);
+    isValid = lerp(isValid, 0.0, Wiwiw_IsNaN(worldIntersectLowerPos) || Wiwiw_IsNaN(worldIntersectUpperPos));
+
+    const float1 worldIntersectDistance = distance(worldIntersectLowerPos, worldIntersectUpperPos);
+    const float3 worldIntersectFinalPos = lerp(worldViewPos, worldIntersectLowerPos, worldViewPos.y < worldIntersectLowerPos.y);
+    const float3 worldIntersectStartPos = worldIntersectFinalPos - worldViewDir * worldIntersectDistance.x;
+
+    float color = 1.0;
+
+    for (float i = 0.0; i < _Wiwiw_ShadowsParams.x; i++)
+    {
+        const float3 worldSamplePos = lerp(worldIntersectStartPos, worldIntersectFinalPos, i * _Wiwiw_ShadowsParams.y);
+
+        const float3 densitySamplePos = mul(_Wiwiw_DensityWorldToObjectMatrix, float4(worldSamplePos, 1.0)).xyz;
+        const float1 densitySampleVal = _Wiwiw_DensityTexture.SampleLevel(sampler_Wiwiw_DensityTexture, densitySamplePos, 0.0).r;
+
+        color = lerp(color, 0.0, densitySampleVal.x * _Wiwiw_ShadowsParams.z);
+    }
+
+    _Wiwiw_ShadowsTexture[indexInCube] = isValid ? color : 0.0;
+}
+
+// --------------------------------------------------------

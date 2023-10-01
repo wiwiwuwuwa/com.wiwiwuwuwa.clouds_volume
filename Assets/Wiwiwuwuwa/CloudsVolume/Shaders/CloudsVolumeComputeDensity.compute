@@ -1,0 +1,40 @@
+#pragma kernel CSMain
+#pragma multi_compile_local WIWIW_THREADS_PER_WAVE_32 WIWIW_THREADS_PER_WAVE_64
+
+// --------------------------------------------------------
+
+#include "../../Utilities/Shaders/Library/GetGlobalBufferCoord3D.hlsl"
+#include "../../Utilities/Shaders/Library/WaveFrontMultiCompile.hlsl"
+#include "Library/GetCloudsNoise.hlsl"
+
+// --------------------------------------------------------
+
+RWTexture3D<float> _Wiwiw_DensityTexture;
+
+float4x4 _Wiwiw_DensityObjectToWorldMatrix;
+
+// inDensityParams.x: scale of clouds noise in any range
+// inDensityParams.y: contrast of clouds noise in range [0, 1]
+// inDensityParams.z: density of clouds noise in range [0, 1]
+// inDensityParams.w: unused
+float4 _Wiwiw_DensityParams;
+
+// x: clouds fade in start pos in range [0, 1]
+// y: clouds fade in final pos in range [0, 1]
+// z: clouds fade out start pos in range [0, 1]
+// w: clouds fade out final pos in range [0, 1]
+float4 _Wiwiw_GradientParams;
+
+// --------------------------------------------------------
+
+WIWIW_NUMTHREADS
+void CSMain(in uint3 id : SV_DispatchThreadID)
+{
+    const uint3 indexInCube = Wiwiw_GetGlobalBufferIndex3D(id.x);
+    const float3 coordInCube = Wiwiw_GetGlobalBufferCoord3D(id.x);
+    const float3 densitySamplePos = mul(_Wiwiw_DensityObjectToWorldMatrix, float4(coordInCube, 1.0)).xyz;
+
+    _Wiwiw_DensityTexture[indexInCube] = Wiwiw_GetCloudsNoise(densitySamplePos, _Wiwiw_DensityParams.xyz, _Wiwiw_GradientParams);
+}
+
+// --------------------------------------------------------
