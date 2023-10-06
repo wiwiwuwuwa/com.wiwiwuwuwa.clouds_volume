@@ -10,6 +10,9 @@ Shader "Wiwiwuwuwa/CloudsVolume/Skybox"
 
         [HDR]
         _SkyUpper ("Sky Upper", Color) = (0.140, 0.080, 0.200, 1.000)
+
+        [HDR]
+        _CloudsAmbient ("Clouds Ambient", Color) = (0.070, 0.040, 0.100, 1.000)
     }
 
     SubShader
@@ -73,6 +76,8 @@ Shader "Wiwiwuwuwa/CloudsVolume/Skybox"
 
             float3 _SkyUpper;
 
+            float3 _CloudsAmbient;
+
             // --------------------------------------------
 
             VertToFrag Vert(DataToVert input)
@@ -94,7 +99,7 @@ Shader "Wiwiwuwuwa/CloudsVolume/Skybox"
                 const float4 sunColor = float4(_SunCol.xyz, sunDelta.x);
 
                 const float4 cloudDelta = UNITY_SAMPLE_TEXCUBE(_SkyboxTexture, input.DirWS);
-                const float4 cloudColor = float4(_SkyUpper + cloudDelta.r * _SunCol.xyz, cloudDelta.g);
+                const float4 cloudColor = float4(_CloudsAmbient + cloudDelta.r * _SunCol.xyz, cloudDelta.g);
                 const float4 sunbmColor = float4(_SunCol.xyz, cloudDelta.b);
 
                 FragToData output = (FragToData)0;
