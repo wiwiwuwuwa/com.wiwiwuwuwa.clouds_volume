@@ -11,6 +11,11 @@ float Wiwiw_GetFadeGradient(in float inUnitPos, in float inGradientPoint0, in fl
 	return val;
 }
 
+float Wiwiw_GetFadeGradient(in float2 inUnitCubePos, in float inGradientPoint0, in float inGradientValue0, in float inGradientPoint1, in float inGradientValue1)
+{
+	return Wiwiw_GetFadeGradient(length(inUnitCubePos), inGradientPoint0, inGradientValue0, inGradientPoint1, inGradientValue1);
+}
+
 float Wiwiw_GetFadeGradient(in float3 inUnitCubePos, in float inGradientPoint0, in float inGradientValue0, in float inGradientPoint1, in float inGradientValue1)
 {
 	return Wiwiw_GetFadeGradient(length(inUnitCubePos), inGradientPoint0, inGradientValue0, inGradientPoint1, inGradientValue1);
@@ -19,6 +24,11 @@ float Wiwiw_GetFadeGradient(in float3 inUnitCubePos, in float inGradientPoint0, 
 void Wiwiw_GetFadeGradient_float(in float inUnitPos, in float inGradientPoint0, in float inGradientValue0, in float inGradientPoint1, in float inGradientValue1, out float outValue)
 {
 	outValue = Wiwiw_GetFadeGradient(inUnitPos, inGradientPoint0, inGradientValue0, inGradientPoint1, inGradientValue1);
+}
+
+void Wiwiw_GetFadeGradient_float2(in float2 inUnitCubePos, in float inGradientPoint0, in float inGradientValue0, in float inGradientPoint1, in float inGradientValue1, out float outValue)
+{
+	outValue = Wiwiw_GetFadeGradient(inUnitCubePos, inGradientPoint0, inGradientValue0, inGradientPoint1, inGradientValue1);
 }
 
 void Wiwiw_GetFadeGradient_float(in float3 inUnitCubePos, in float inGradientPoint0, in float inGradientValue0, in float inGradientPoint1, in float inGradientValue1, out float outValue)

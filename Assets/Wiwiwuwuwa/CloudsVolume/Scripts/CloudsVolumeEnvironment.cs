@@ -60,12 +60,12 @@ namespace Wiwiwuwuwa.CloudsVolume
 
         // ----------------------------
 
-        static Light GetSunLightComponent()
+        public static Light GetSunLightComponent()
         {
             return RenderSettings.sun;
         }
 
-        static Transform GetSunTranformComponent()
+        public static Transform GetSunTranformComponent()
         {
             var sunLight = GetSunLightComponent();
             if (!sunLight)

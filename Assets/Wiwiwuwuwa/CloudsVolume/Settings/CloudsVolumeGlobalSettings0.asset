@@ -30,3 +30,5 @@ MonoBehaviour:
   cubemapTextureSize: 512
   cubemapSamples: 32
   cubemapDensity: 0.5
+  cookiesComputeShader: {fileID: 7200000, guid: b0f42889fc90fc348ae1fffa557f9806, type: 3}
+  cookiesTextureSize: 128

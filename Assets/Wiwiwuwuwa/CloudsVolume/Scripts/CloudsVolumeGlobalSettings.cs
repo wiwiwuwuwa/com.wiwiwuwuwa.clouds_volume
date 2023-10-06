@@ -62,6 +62,12 @@ namespace Wiwiwuwuwa.CloudsVolume
         [SerializeField]
         float cubemapDensity = 0.5f;
 
+        [SerializeField]
+        ComputeShader cookiesComputeShader = default;
+
+        [SerializeField]
+        int cookiesTextureSize = 128;
+
         // --------------------------------
 
         public event Action OnValidateEvent;
@@ -103,6 +109,10 @@ namespace Wiwiwuwuwa.CloudsVolume
         public float CubemapSamples => cubemapSamples;
 
         public float CubemapDensity => cubemapDensity;
+
+        public ComputeShader CookiesComputeShader => cookiesComputeShader;
+
+        public int CookiesTextureSize => cookiesTextureSize;
 
         // --------------------------------
 

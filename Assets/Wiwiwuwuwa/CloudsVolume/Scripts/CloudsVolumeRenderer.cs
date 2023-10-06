@@ -71,6 +71,7 @@ namespace Wiwiwuwuwa.CloudsVolume
             ShutSystems();
 
             InitCubemapTexture();
+            InitCookiesTexture();
             InitComputeOperation();
             InitReflectionProbe();
 
@@ -89,6 +90,7 @@ namespace Wiwiwuwuwa.CloudsVolume
         {
             ShutReflectionProbe();
             ShutComputeOperation();
+            ShutCookiesTexture();
             ShutCubemapTexture();
         }
 
@@ -140,6 +142,52 @@ namespace Wiwiwuwuwa.CloudsVolume
 
         // ----------------------------------------------------
 
+        RenderTexture cookiesTexture = default;
+
+        // --------------------------------
+
+        void InitCookiesTexture()
+        {
+            ShutCookiesTexture();
+
+            if (!globalSettings)
+            {
+                return;
+            }
+
+            cookiesTexture = RenderTexture.GetTemporary(new RenderTextureDescriptor
+            {
+                dimension = TextureDimension.Tex2D,
+                colorFormat = RenderTextureFormat.ARGB32,
+                width = globalSettings.CookiesTextureSize,
+                height = globalSettings.CookiesTextureSize,
+                volumeDepth = 1,
+                bindMS = false,
+                msaaSamples = 1,
+                enableRandomWrite = true,
+            });
+
+            if (!cookiesTexture)
+            {
+                return;
+            }
+
+            cookiesTexture.filterMode = FilterMode.Bilinear;
+            cookiesTexture.wrapMode = TextureWrapMode.Clamp;
+        }
+
+        void ShutCookiesTexture()
+        {
+            if (!cookiesTexture)
+            {
+                return;
+            }
+
+            RenderTexture.ReleaseTemporary(cookiesTexture);
+        }
+
+        // ----------------------------------------------------
+
         CloudsVolumeCompute computeOperation = default;
 
         // --------------------------------
@@ -158,7 +206,7 @@ namespace Wiwiwuwuwa.CloudsVolume
                 return;
             }
 
-            computeOperation = new CloudsVolumeCompute(globalSettings, cubemapTexture);
+            computeOperation = new CloudsVolumeCompute(globalSettings, cubemapTexture, cookiesTexture);
         }
 
         void TickComputeOperation()
@@ -226,6 +274,12 @@ namespace Wiwiwuwuwa.CloudsVolume
 
         void SyncRendererProperties()
         {
+            SyncRendererProperties_Sky();
+            SyncRendererProperties_Sun();
+        }
+
+        void SyncRendererProperties_Sky()
+        {
             if (!cubemapTexture)
             {
                 return;
@@ -241,6 +295,22 @@ namespace Wiwiwuwuwa.CloudsVolume
             skyboxMaterial.SetVector(SHADER_SUN_COL_PROPERTY, math.float4(CloudsVolumeEnvironment.GetSunColor(), default));
             skyboxMaterial.SetVector(SHADER_SUN_DIR_PROPERTY, math.float4(-CloudsVolumeEnvironment.GetSunForwardVector(), default));
             DynamicGI.UpdateEnvironment();
+        }
+
+        void SyncRendererProperties_Sun()
+        {
+            if (!cookiesTexture)
+            {
+                return;
+            }
+
+            var sun = CloudsVolumeEnvironment.GetSunLightComponent();
+            if (!sun)
+            {
+                return;
+            }
+
+            sun.cookie = cookiesTexture;
         }
 
         // ----------------------------------------------------

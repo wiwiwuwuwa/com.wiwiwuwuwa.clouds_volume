@@ -14,12 +14,15 @@ namespace Wiwiwuwuwa.CloudsVolume
 
         readonly RenderTexture cubemapTexture = default;
 
+        readonly RenderTexture cookiesTexture = default;
+
         // ----------------------------
 
-        public CloudsVolumeCompute(CloudsVolumeGlobalSettings globalSettings, RenderTexture cubemapTexture)
+        public CloudsVolumeCompute(CloudsVolumeGlobalSettings globalSettings, RenderTexture cubemapTexture, RenderTexture cookiesTexture)
         {
             this.globalSettings = globalSettings;
             this.cubemapTexture = cubemapTexture;
+            this.cookiesTexture = cookiesTexture;
         }
 
         protected override IEnumerator Execute()
@@ -33,6 +36,12 @@ namespace Wiwiwuwuwa.CloudsVolume
             if (!cubemapTexture)
             {
                 Debug.LogError($"({nameof(cubemapTexture)}) is not valid");
+                yield break;
+            }
+
+            if (!cookiesTexture)
+            {
+                Debug.LogError($"({nameof(cookiesTexture)}) is not valid");
                 yield break;
             }
 
@@ -111,6 +120,16 @@ namespace Wiwiwuwuwa.CloudsVolume
 
             Defer(() => cubemapCompute.Dispose());
             while (cubemapCompute.MoveNext()) yield return default;
+
+            var cookiesCompute = new CloudsVolumeComputeCookies(globalSettings, shadowsTexture, cookiesTexture);
+            if (cookiesCompute is null)
+            {
+                Debug.LogError($"({nameof(cookiesCompute)}) is not valid");
+                yield break;
+            }
+
+            Defer(() => cookiesCompute.Dispose());
+            while (cookiesCompute.MoveNext()) yield return default;
         }
 
         // ----------------------------------------------------

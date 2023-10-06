@@ -36,6 +36,12 @@ namespace Wiwiwuwuwa.CloudsVolume
             DrawCubemapSamplesProp();
             DrawCubemapDensityProp();
 
+            EditorGUILayout.Space();
+
+            EditorGUILayout.LabelField("Cookies Settings", EditorStyles.boldLabel);
+            DrawCookiesComputeShaderProp();
+            DrawCookiesTextureSizeProp();
+
             ApplySerializedObject();
         }
 
@@ -373,6 +379,47 @@ namespace Wiwiwuwuwa.CloudsVolume
             var propertyValue = serializedProperty.floatValue;
             propertyValue = EditorGUILayout.Slider(serializedProperty.displayName, propertyValue, 0f, 1f);
             serializedProperty.floatValue = propertyValue;
+        }
+
+        void DrawCookiesComputeShaderProp()
+        {
+            var serializedObject = this.serializedObject;
+            if (serializedObject is null)
+            {
+                Debug.LogError($"({nameof(serializedObject)}) is null");
+                return;
+            }
+
+            var serializedProperty = serializedObject.FindProperty("cookiesComputeShader");
+            if (serializedProperty is null)
+            {
+                Debug.LogError($"({nameof(serializedProperty)}) is not valid");
+                return;
+            }
+
+            EditorGUILayout.PropertyField(serializedProperty);
+        }
+
+        void DrawCookiesTextureSizeProp()
+        {
+            var serializedObject = this.serializedObject;
+            if (serializedObject is null)
+            {
+                Debug.LogError($"({nameof(serializedObject)}) is null");
+                return;
+            }
+
+            var serializedProperty = serializedObject.FindProperty("cookiesTextureSize");
+            if (serializedProperty is null || serializedProperty.numericType != SerializedPropertyNumericType.Int32)
+            {
+                Debug.LogError($"({nameof(serializedProperty)}) is not valid");
+                return;
+            }
+
+            var propertyValue = serializedProperty.intValue;
+            propertyValue = EditorGUILayout.IntField(serializedProperty.displayName, propertyValue);
+            propertyValue = math.ceilpow2(math.clamp(propertyValue, 2, 1024));
+            serializedProperty.intValue = propertyValue;
         }
 
         void ApplySerializedObject()
