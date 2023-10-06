@@ -85,6 +85,8 @@ Material:
     - _CloudsAmbient: {r: 0.039215688, g: 0.05490196, b: 0.101960786, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _SkyGradientLower: {r: 0.455, g: 0.529, b: 0.604, a: 1}
+    - _SkyGradientUpper: {r: 0.078, g: 0.109, b: 0.2, a: 1}
     - _SkyLower: {r: 0.45490196, g: 0.5294118, b: 0.6039216, a: 1}
     - _SkyUpper: {r: 0.07843138, g: 0.10882354, b: 0.2, a: 1}
   m_BuildTextureStacks: []

@@ -6,13 +6,13 @@ Shader "Wiwiwuwuwa/CloudsVolume/Skybox"
         _SkyboxTexture ("Skybox Texture", Cube) = "black" {}
 
         [HDR]
-        _SkyLower ("Sky Lower", Color) = (0.604, 0.453, 0.591, 1.000)
+        _SkyGradientLower ("Sky Gradient Lower", Color) = (0.455, 0.529, 0.604, 1.000)
 
         [HDR]
-        _SkyUpper ("Sky Upper", Color) = (0.140, 0.080, 0.200, 1.000)
+        _SkyGradientUpper ("Sky Gradient Upper", Color) = (0.078, 0.109, 0.200, 1.000)
 
         [HDR]
-        _CloudsAmbient ("Clouds Ambient", Color) = (0.070, 0.040, 0.100, 1.000)
+        _CloudsAmbient ("Clouds Ambient", Color) = (0.039, 0.054, 0.100, 1.000)
     }
 
     SubShader
@@ -72,9 +72,9 @@ Shader "Wiwiwuwuwa/CloudsVolume/Skybox"
 
             float4 _SunDir;
 
-            float3 _SkyLower;
+            float3 _SkyGradientLower;
 
-            float3 _SkyUpper;
+            float3 _SkyGradientUpper;
 
             float3 _CloudsAmbient;
 
@@ -93,7 +93,7 @@ Shader "Wiwiwuwuwa/CloudsVolume/Skybox"
                 input.DirWS = normalize(input.DirWS);
 
                 const float1 airDelta = Wiwiw_GetFogExp2(2.5, Wiwiw_GetRemap(input.DirWS.y, -1.0, 1.0, 1.0, 0.0));
-                const float3 airColor = lerp(_SkyLower, _SkyUpper, airDelta.x);
+                const float3 airColor = lerp(_SkyGradientLower, _SkyGradientUpper, airDelta.x);
 
                 const float1 sunDelta = Wiwiw_GetFadeGradient(Wiwiw_GetRemap(dot(input.DirWS, _SunDir.xyz), 0.9975, 1.0, 1.0, 0.0), 0.5, 1.0, 1.0, 0.0);
                 const float4 sunColor = float4(_SunCol.xyz, sunDelta.x);
