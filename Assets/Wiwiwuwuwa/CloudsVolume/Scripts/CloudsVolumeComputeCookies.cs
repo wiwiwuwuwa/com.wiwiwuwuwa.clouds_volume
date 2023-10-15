@@ -44,19 +44,19 @@ namespace Wiwiwuwuwa.CloudsVolume
                 yield break;
             }
 
-            var cookiesComputeShader = globalSettings.CookiesComputeShader;
-            if (!cookiesComputeShader)
+            var cookiesShader = globalSettings.CookiesShader;
+            if (!cookiesShader)
             {
-                Debug.LogError($"({nameof(cookiesComputeShader)}) is not valid");
+                Debug.LogError($"({nameof(cookiesShader)}) is not valid");
                 yield break;
             }
 
-            cookiesComputeShader.SetTexture(default, SHADER_SHADOWS_TEXTURE_PROPERTY, shadowsTexture);
-            cookiesComputeShader.SetTexture(default, SHADER_COOKIES_TEXTURE_PROPERTY, cookiesTexture);
+            cookiesShader.SetTexture(default, SHADER_SHADOWS_TEXTURE_PROPERTY, shadowsTexture);
+            cookiesShader.SetTexture(default, SHADER_COOKIES_TEXTURE_PROPERTY, cookiesTexture);
 
             var dispatchYield = WaveFrontUtils.DispatchYield
             (
-                computeShader: cookiesComputeShader,
+                computeShader: cookiesShader,
                 bufferSize: math.int3(cookiesTexture.width, cookiesTexture.height, cookiesTexture.volumeDepth)
             );
             while (dispatchYield.MoveNext()) yield return default;

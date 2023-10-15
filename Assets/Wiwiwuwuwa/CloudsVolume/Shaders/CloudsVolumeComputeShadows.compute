@@ -1,5 +1,5 @@
 #pragma kernel CSMain
-#pragma multi_compile_local WIWIW_THREADS_PER_WAVE_32 WIWIW_THREADS_PER_WAVE_64
+#pragma multi_compile_local WIWIW_THREADS_PER_WAVE_16 WIWIW_THREADS_PER_WAVE_32 WIWIW_THREADS_PER_WAVE_64
 
 // --------------------------------------------------------
 
@@ -7,30 +7,21 @@
 #include "../../Utilities/Shaders/Library/GetLineIntersectPlaneY.hlsl"
 #include "../../Utilities/Shaders/Library/IsNaN.hlsl"
 #include "../../Utilities/Shaders/Library/WaveFrontMultiCompile.hlsl"
+#include "Library/GetClouds.hlsl"
 
 // --------------------------------------------------------
-
-Texture3D<float> _Wiwiw_DensityTexture;
-
-SamplerState sampler_Wiwiw_DensityTexture;
-
-float4x4 _Wiwiw_DensityWorldToObjectMatrix;
 
 RWTexture3D<float> _Wiwiw_ShadowsTexture;
 
 float4x4 _Wiwiw_ShadowsObjectToWorldMatrix;
 
-// x: clouds start pos
-// y: clouds final pos
-// z: unused
-// w: unused
-float4 _Wiwiw_DensityParams;
+float3 _Wiwiw_ShadowDirection;
 
-// x: samples count
-// y: rcp(samples count)
-// z: density
-// w: unused
-float4 _Wiwiw_ShadowsParams;
+float _Wiwiw_ShadowSamplesCountVal;
+
+float _Wiwiw_ShadowSamplesCountRcp;
+
+float _Wiwiw_ShadowDensity;
 
 // --------------------------------------------------------
 
@@ -42,34 +33,26 @@ void CSMain(in uint3 id : SV_DispatchThreadID)
     const uint3 indexInCube = Wiwiw_GetGlobalBufferIndex3D(id.x);
     const float3 coordInCube = Wiwiw_GetGlobalBufferCoord3D(id.x);
 
-    const float3 shadowsViewPos = coordInCube;
-    const float3 shadowsViewDir = float3(0.0, 0.0, 1.0);
+    const float3 pointPosWS = mul(_Wiwiw_ShadowsObjectToWorldMatrix, float4(coordInCube, 1.0)).xyz;
+    const float3 pointDirWS = _Wiwiw_ShadowDirection;
+    isValid = pointDirWS.y < 0.0 ? isValid : 0.0;
 
-    const float3 worldViewPos = mul(_Wiwiw_ShadowsObjectToWorldMatrix, float4(shadowsViewPos, 1.0)).xyz;
-    const float3 worldViewDir = mul(_Wiwiw_ShadowsObjectToWorldMatrix, float4(shadowsViewDir, 0.0)).xyz;
-    isValid = lerp(isValid, 0.0, worldViewDir.y > 0.0);
+    const float cloudsUpperPlaneWS = _Wiwiw_CloudsGradientParams[3];
+    const float3 intersectPosWS = Wiwiw_GetLineIntersectPlaneY(pointPosWS, pointDirWS, cloudsUpperPlaneWS);
+    isValid = !Wiwiw_IsNaN(intersectPosWS) ? isValid : 0.0;
 
-    const float3 worldIntersectLowerPos = Wiwiw_GetLineIntersectPlaneY(worldViewPos, worldViewDir, _Wiwiw_DensityParams.x);
-    const float3 worldIntersectUpperPos = Wiwiw_GetLineIntersectPlaneY(worldViewPos, worldViewDir, _Wiwiw_DensityParams.y);
-    isValid = lerp(isValid, 0.0, Wiwiw_IsNaN(worldIntersectLowerPos) || Wiwiw_IsNaN(worldIntersectUpperPos));
+    const float3 sampleStartPosWS = intersectPosWS;
+    const float3 sampleFinalPosWS = pointPosWS;
 
-    const float1 worldIntersectDistance = distance(worldIntersectLowerPos, worldIntersectUpperPos);
-    const float3 worldIntersectFinalPos = lerp(worldViewPos, worldIntersectLowerPos, worldViewPos.y < worldIntersectLowerPos.y);
-    const float3 worldIntersectStartPos = worldIntersectFinalPos - worldViewDir * worldIntersectDistance.x;
+    float lightness = 1.0;
 
-    float color = 1.0;
-
-    for (float i = 0.0; i < _Wiwiw_ShadowsParams.x; i++)
+    for (float i = 0.0; i < _Wiwiw_ShadowSamplesCountVal; i++)
     {
-        const float3 worldSamplePos = lerp(worldIntersectStartPos, worldIntersectFinalPos, i * _Wiwiw_ShadowsParams.y);
+        const float3 samplePosWS = lerp(sampleStartPosWS, sampleFinalPosWS, i * _Wiwiw_ShadowSamplesCountRcp);
+        const float sampleValue = Wiwiw_GetClouds(samplePosWS);
 
-        const float3 densitySamplePos = mul(_Wiwiw_DensityWorldToObjectMatrix, float4(worldSamplePos, 1.0)).xyz;
-        const float1 densitySampleVal = _Wiwiw_DensityTexture.SampleLevel(sampler_Wiwiw_DensityTexture, densitySamplePos, 0.0).r;
-
-        color = lerp(color, 0.0, densitySampleVal.x * _Wiwiw_ShadowsParams.z);
+        lightness = lerp(lightness, 0.0, sampleValue * _Wiwiw_ShadowDensity);
     }
 
-    _Wiwiw_ShadowsTexture[indexInCube] = isValid ? color : 0.0;
+    _Wiwiw_ShadowsTexture[indexInCube] = isValid ? lightness : 0.0;
 }
-
-// --------------------------------------------------------

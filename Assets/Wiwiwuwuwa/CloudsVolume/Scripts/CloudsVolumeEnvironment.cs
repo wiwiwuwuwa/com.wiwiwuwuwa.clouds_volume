@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEditor;
 using Unity.Mathematics;
 
 namespace Wiwiwuwuwa.CloudsVolume
@@ -7,21 +8,9 @@ namespace Wiwiwuwuwa.CloudsVolume
     {
         // ----------------------------------------------------
 
-        public static float4x4 GetSunObjectToWorldMatrix()
+        public static float3 GetSunForward()
         {
-            var sunTransform = GetSunTranformComponent();
-            if (!sunTransform)
-            {
-                Debug.LogError($"({nameof(sunTransform)}) is not valid");
-                return float4x4.identity;
-            }
-
-            return float4x4.LookAt(default, GetSunForwardVector(), GetSunUpwardsVector());
-        }
-
-        public static float3 GetSunForwardVector()
-        {
-            var sunTransform = GetSunTranformComponent();
+            var sunTransform = GetSunTransform();
             if (!sunTransform)
             {
                 Debug.LogError($"({nameof(sunTransform)}) is not valid");
@@ -31,21 +20,9 @@ namespace Wiwiwuwuwa.CloudsVolume
             return sunTransform.forward;
         }
 
-        public static float3 GetSunUpwardsVector()
-        {
-            var sunTransform = GetSunTranformComponent();
-            if (!sunTransform)
-            {
-                Debug.LogError($"({nameof(sunTransform)}) is not valid");
-                return default;
-            }
-
-            return sunTransform.up;
-        }
-
         public static float3 GetSunColor()
         {
-            var sunLight = GetSunLightComponent();
+            var sunLight = GetSunLight();
             if (!sunLight)
             {
                 Debug.LogError($"({nameof(sunLight)}) is not valid");
@@ -58,16 +35,28 @@ namespace Wiwiwuwuwa.CloudsVolume
             return math.float3(color.r, color.g, color.b);
         }
 
+        public static float3 GetEyePosition()
+        {
+            var eyeTransform = GetEyeTransform();
+            if (!eyeTransform)
+            {
+                Debug.LogError($"({nameof(eyeTransform)}) is not valid");
+                return default;
+            }
+
+            return eyeTransform.position;
+        }
+
         // ----------------------------
 
-        public static Light GetSunLightComponent()
+        public static Light GetSunLight()
         {
             return RenderSettings.sun;
         }
 
-        public static Transform GetSunTranformComponent()
+        public static Transform GetSunTransform()
         {
-            var sunLight = GetSunLightComponent();
+            var sunLight = GetSunLight();
             if (!sunLight)
             {
                 Debug.LogError($"({nameof(sunLight)}) is not valid");
@@ -75,6 +64,54 @@ namespace Wiwiwuwuwa.CloudsVolume
             }
 
             return sunLight.transform;
+        }
+
+        public static Camera GetEyeCamera()
+        {
+            var editCamera = GetEditCamera();
+            if (editCamera)
+            {
+                return editCamera;
+            }
+
+            var gameCamera = GetGameCamera();
+            if (gameCamera)
+            {
+                return gameCamera;
+            }
+
+            Debug.LogError($"({nameof(editCamera)}) and ({nameof(gameCamera)}) are not valid");
+            return default;
+        }
+
+        public static Transform GetEyeTransform()
+        {
+            var eyeCamera = GetEyeCamera();
+            if (!eyeCamera)
+            {
+                Debug.LogError($"({nameof(eyeCamera)}) is not valid");
+                return default;
+            }
+
+            return eyeCamera.transform;
+        }
+
+        // ----------------------------
+
+        static Camera GetEditCamera()
+        {
+            var sceneView = SceneView.lastActiveSceneView;
+            if (!sceneView)
+            {
+                return default;
+            }
+
+            return sceneView.camera;
+        }
+
+        static Camera GetGameCamera()
+        {
+            return Camera.main;
         }
 
         // ----------------------------------------------------

@@ -14,19 +14,33 @@ namespace Wiwiwuwuwa.CloudsVolume
 
         const string SHADER_DENSITY_WORLD_TO_OBJECT_MATRIX_PROPERTY = "_Wiwiw_DensityWorldToObjectMatrix";
 
+        const string SHADER_CLOUDS_GRADIENT_PARAMS_PROPERTY = "_Wiwiw_CloudsGradientParams";
+
+        const string SHADER_CLOUDS_GRADIENT_VALUES_PROPERTY = "_Wiwiw_CloudsGradientValues";
+
+        const string SHADER_CLOUDS_CONTRAST_PROPERTY = "_Wiwiw_CloudsContrast";
+
+        const string SHADER_CLOUDS_MIDPOINT_PROPERTY = "_Wiwiw_CloudsMidpoint";
+
         const string SHADER_SHADOWS_TEXTURE_PROPERTY = "_Wiwiw_ShadowsTexture";
 
         const string SHADER_SHADOWS_WORLD_TO_OBJECT_MATRIX_PROPERTY = "_Wiwiw_ShadowsWorldToObjectMatrix";
 
-        const string SHADER_DENSITY_PARAMS_PROPERTY = "_Wiwiw_DensityParams";
-
-        const string SHADER_CUBEMAP_PARAMS_PROPERTY = "_Wiwiw_CubemapParams";
+        const string SHADER_SHADOW_DIRECTION_PROPERTY = "_Wiwiw_ShadowDirection";
 
         const string SHADER_CUBEMAP_TEXTURE_PROPERTY = "_Wiwiw_CubemapTexture";
 
         const string SHADER_CUBEMAP_FACE_ID_PROPERTY = "_Wiwiw_CubemapFaceID";
 
-        const string SHADER_SUN_DIR_PROPERTY = "_Wiwiw_SunDir";
+        const string SHADER_CAMERA_POSITION_PROPERTY = "_Wiwiw_CameraPosition";
+
+        const string SHADER_CUBEMAP_SAMPLES_COUNT_VAL_PROPERTY = "_Wiwiw_CubemapSamplesCountVal";
+
+        const string SHADER_CUBEMAP_SAMPLES_COUNT_RCP_PROPERTY = "_Wiwiw_CubemapSamplesCountRcp";
+
+        const string SHADER_CUBEMAP_DENSITY_PROPERTY = "_Wiwiw_CubemapDensity";
+
+        // --------------------------------
 
         readonly CloudsVolumeGlobalSettings globalSettings = default;
 
@@ -72,32 +86,26 @@ namespace Wiwiwuwuwa.CloudsVolume
                 yield break;
             }
 
-            var cubemapComputeShader = globalSettings.CubemapComputeShader;
-            if (!cubemapComputeShader)
+            var cubemapShader = globalSettings.CubemapShader;
+            if (!cubemapShader)
             {
-                Debug.LogError($"({nameof(cubemapComputeShader)}) is not valid");
+                Debug.LogError($"({nameof(cubemapShader)}) is not valid");
                 yield break;
             }
 
-            cubemapComputeShader.SetTexture(default, SHADER_DENSITY_TEXTURE_PROPERTY, densityTexture);
-            cubemapComputeShader.SetMatrix(SHADER_DENSITY_WORLD_TO_OBJECT_MATRIX_PROPERTY, ClodusVolumeMatrices.GetDensityWorldToObjectMatrix());
-            cubemapComputeShader.SetTexture(default, SHADER_SHADOWS_TEXTURE_PROPERTY, shadowsTexture);
-            cubemapComputeShader.SetMatrix(SHADER_SHADOWS_WORLD_TO_OBJECT_MATRIX_PROPERTY, ClodusVolumeMatrices.GetShadowsWorldToObjectMatrix(globalSettings.ShadowsAreaScale));
-            cubemapComputeShader.SetVector(SHADER_DENSITY_PARAMS_PROPERTY, math.float4
-            (
-                x: globalSettings.DensityFadeInStartPos,
-                y: globalSettings.DensityFadeOutFinalPos,
-                z: default,
-                w: default
-            ));
-            cubemapComputeShader.SetVector(SHADER_CUBEMAP_PARAMS_PROPERTY, math.float4
-            (
-                x: globalSettings.CubemapSamples,
-                y: math.rcp(globalSettings.CubemapSamples),
-                z: globalSettings.CubemapDensity,
-                w: default
-            ));
-            cubemapComputeShader.SetVector(SHADER_SUN_DIR_PROPERTY, math.float4(CloudsVolumeEnvironment.GetSunForwardVector(), 0f));
+            cubemapShader.SetTexture(default, SHADER_DENSITY_TEXTURE_PROPERTY, densityTexture);
+            cubemapShader.SetMatrix(SHADER_DENSITY_WORLD_TO_OBJECT_MATRIX_PROPERTY, CloudsVolumeMatrices.GetDensityWorldToObject(globalSettings.CloudsAreaRange));
+            cubemapShader.SetFloats(SHADER_CLOUDS_GRADIENT_PARAMS_PROPERTY, globalSettings.CloudsGradientParams);
+            cubemapShader.SetFloats(SHADER_CLOUDS_GRADIENT_VALUES_PROPERTY, math.float4(0f, 1f, 1f, 0f));
+            cubemapShader.SetFloat(SHADER_CLOUDS_CONTRAST_PROPERTY, globalSettings.CloudsContrast);
+            cubemapShader.SetFloat(SHADER_CLOUDS_MIDPOINT_PROPERTY, globalSettings.CloudsMidpoint);
+            cubemapShader.SetTexture(default, SHADER_SHADOWS_TEXTURE_PROPERTY, shadowsTexture);
+            cubemapShader.SetMatrix(SHADER_SHADOWS_WORLD_TO_OBJECT_MATRIX_PROPERTY, CloudsVolumeMatrices.GetShadowsWorldToObjectMatrix(globalSettings.CloudsGradientParams.x, globalSettings.CloudsGradientParams.w, globalSettings.CloudsAreaRange));
+            cubemapShader.SetVector(SHADER_SHADOW_DIRECTION_PROPERTY, CloudsVolumeEnvironment.GetSunForward());
+            cubemapShader.SetVector(SHADER_CAMERA_POSITION_PROPERTY, CloudsVolumeEnvironment.GetEyePosition());
+            cubemapShader.SetFloat(SHADER_CUBEMAP_SAMPLES_COUNT_VAL_PROPERTY, globalSettings.CubemapSamples);
+            cubemapShader.SetFloat(SHADER_CUBEMAP_SAMPLES_COUNT_RCP_PROPERTY, math.rcp(globalSettings.CubemapSamples));
+            cubemapShader.SetFloat(SHADER_CUBEMAP_DENSITY_PROPERTY, globalSettings.CubemapDensity);
 
             for (var cubemapFaceID = 0; cubemapFaceID < 6; cubemapFaceID++)
             {
@@ -120,12 +128,12 @@ namespace Wiwiwuwuwa.CloudsVolume
                 }
 
                 Defer(() => RenderTexture.ReleaseTemporary(cubemapFaceTexture));
-                cubemapComputeShader.SetTexture(default, SHADER_CUBEMAP_TEXTURE_PROPERTY, cubemapFaceTexture);
-                cubemapComputeShader.SetInt(SHADER_CUBEMAP_FACE_ID_PROPERTY, cubemapFaceID);
+                cubemapShader.SetTexture(default, SHADER_CUBEMAP_TEXTURE_PROPERTY, cubemapFaceTexture);
+                cubemapShader.SetFloat(SHADER_CUBEMAP_FACE_ID_PROPERTY, cubemapFaceID);
 
                 var dispatchYield = WaveFrontUtils.DispatchYield
                 (
-                    computeShader: cubemapComputeShader,
+                    computeShader: cubemapShader,
                     bufferSize: math.int3(cubemapTexture.width, cubemapTexture.height, cubemapTexture.volumeDepth)
                 );
                 while (dispatchYield.MoveNext()) yield return default;

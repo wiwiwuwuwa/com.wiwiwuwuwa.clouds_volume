@@ -1,5 +1,5 @@
 #pragma kernel CSMain
-#pragma multi_compile_local WIWIW_THREADS_PER_WAVE_32 WIWIW_THREADS_PER_WAVE_64
+#pragma multi_compile_local WIWIW_THREADS_PER_WAVE_16 WIWIW_THREADS_PER_WAVE_32 WIWIW_THREADS_PER_WAVE_64
 
 // --------------------------------------------------------
 

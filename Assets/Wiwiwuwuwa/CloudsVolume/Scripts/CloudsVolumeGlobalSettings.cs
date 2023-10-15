@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Wiwiwuwuwa.CloudsVolume
@@ -9,49 +10,37 @@ namespace Wiwiwuwuwa.CloudsVolume
         // ----------------------------------------------------
 
         [SerializeField]
-        ComputeShader densityComputeShader = default;
+        ComputeShader cloudsShader = default;
 
         [SerializeField]
-        int densityTextureSize = 64;
+        int cloudsTextureSize = 64;
 
         [SerializeField]
-        float densityNoiseScale = 6f;
+        float cloudsAreaRange = 256f;
 
         [SerializeField]
-        float densityContrast = 0.85f;
+        float4 cloudsGradientParams = math.float4(128f, 160f, 160f, 192f);
 
         [SerializeField]
-        float densityMidpoint = 0.35f;
+        float cloudsContrast = 0.5f;
 
         [SerializeField]
-        float densityFadeInStartPos = 0.40f;
+        float cloudsMidpoint = 0.2f;
 
         [SerializeField]
-        float densityFadeInFinalPos = 0.45f;
+        ComputeShader shadowShader = default;
 
         [SerializeField]
-        float densityFadeOutStartPos = 0.55f;
+        int shadowTextureSize = 128;
 
         [SerializeField]
-        float densityFadeOutFinalPos = 0.60f;
+        int shadowSamples = 32;
 
         [SerializeField]
-        ComputeShader shadowsComputeShader = default;
+        float shadowDensity = 1f;
 
         [SerializeField]
-        int shadowsTextureSize = 128;
-
-        [SerializeField]
-        float shadowsAreaScale = 2f;
-
-        [SerializeField]
-        int shadowsSamples = 32;
-
-        [SerializeField]
-        float shadowsDensity = 1f;
-
-        [SerializeField]
-        ComputeShader cubemapComputeShader = default;
+        ComputeShader cubemapShader = default;
 
         [SerializeField]
         int cubemapTextureSize = 512;
@@ -60,10 +49,10 @@ namespace Wiwiwuwuwa.CloudsVolume
         int cubemapSamples = 32;
 
         [SerializeField]
-        float cubemapDensity = 0.5f;
+        float cubemapDensity = 1f;
 
         [SerializeField]
-        ComputeShader cookiesComputeShader = default;
+        ComputeShader cookiesShader = default;
 
         [SerializeField]
         int cookiesTextureSize = 128;
@@ -74,35 +63,27 @@ namespace Wiwiwuwuwa.CloudsVolume
 
         // --------------------------------
 
-        public ComputeShader DensityComputeShader => densityComputeShader;
+        public ComputeShader CloudsShader => cloudsShader;
 
-        public int DensityTextureSize => densityTextureSize;
+        public int CloudsTextureSize => cloudsTextureSize;
 
-        public float DensityNoiseScale => densityNoiseScale;
+        public float CloudsAreaRange => cloudsAreaRange;
 
-        public float DensityContrast => densityContrast;
+        public float4 CloudsGradientParams => cloudsGradientParams;
 
-        public float DensityMidpoint => densityMidpoint;
+        public float CloudsContrast => cloudsContrast;
 
-        public float DensityFadeInStartPos => densityFadeInStartPos;
+        public float CloudsMidpoint => math.saturate(1f - cloudsMidpoint);
 
-        public float DensityFadeInFinalPos => densityFadeInFinalPos;
+        public ComputeShader ShadowShader => shadowShader;
 
-        public float DensityFadeOutStartPos => densityFadeOutStartPos;
+        public int ShadowTextureSize => shadowTextureSize;
 
-        public float DensityFadeOutFinalPos => densityFadeOutFinalPos;
+        public int ShadowSamples => shadowSamples;
 
-        public ComputeShader ShadowsComputeShader => shadowsComputeShader;
+        public float ShadowDensity => shadowDensity;
 
-        public int ShadowsTextureSize => shadowsTextureSize;
-
-        public float ShadowsAreaScale => shadowsAreaScale;
-
-        public float ShadowsSamples => shadowsSamples;
-
-        public float ShadowsDensity => shadowsDensity;
-
-        public ComputeShader CubemapComputeShader => cubemapComputeShader;
+        public ComputeShader CubemapShader => cubemapShader;
 
         public int CubemapTextureSize => cubemapTextureSize;
 
@@ -110,7 +91,7 @@ namespace Wiwiwuwuwa.CloudsVolume
 
         public float CubemapDensity => cubemapDensity;
 
-        public ComputeShader CookiesComputeShader => cookiesComputeShader;
+        public ComputeShader CookiesShader => cookiesShader;
 
         public int CookiesTextureSize => cookiesTextureSize;
 

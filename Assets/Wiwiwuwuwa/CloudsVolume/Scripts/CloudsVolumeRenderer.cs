@@ -293,7 +293,7 @@ namespace Wiwiwuwuwa.CloudsVolume
 
             skyboxMaterial.SetTexture(SHADER_SKYBOX_TEXTURE_PROPERTY, cubemapTexture);
             skyboxMaterial.SetVector(SHADER_SUN_COL_PROPERTY, math.float4(CloudsVolumeEnvironment.GetSunColor(), default));
-            skyboxMaterial.SetVector(SHADER_SUN_DIR_PROPERTY, math.float4(-CloudsVolumeEnvironment.GetSunForwardVector(), default));
+            skyboxMaterial.SetVector(SHADER_SUN_DIR_PROPERTY, math.float4(-CloudsVolumeEnvironment.GetSunForward(), default));
             DynamicGI.UpdateEnvironment();
         }
 
@@ -304,7 +304,7 @@ namespace Wiwiwuwuwa.CloudsVolume
                 return;
             }
 
-            var sun = CloudsVolumeEnvironment.GetSunLightComponent();
+            var sun = CloudsVolumeEnvironment.GetSunLight();
             if (!sun)
             {
                 return;

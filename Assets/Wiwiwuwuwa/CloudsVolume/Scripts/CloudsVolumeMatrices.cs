@@ -1,40 +1,40 @@
-using UnityEngine;
 using Unity.Mathematics;
 
 namespace Wiwiwuwuwa.CloudsVolume
 {
-    public static class ClodusVolumeMatrices
+    public static class CloudsVolumeMatrices
     {
         // ----------------------------------------------------
 
-        public static float4x4 GetShadowsToDensityMatrix(float shadowsAreaScale)
+        public static float4x4 GetDensityObjectToWorld(float cloudsAreaRange)
         {
-            return math.mul(GetShadowsWorldToObjectMatrix(shadowsAreaScale), GetDensityObjectToWorldMatrix());
+            var matrix = float4x4.identity;
+
+            matrix = math.mul(float4x4.Translate(-0.5f), matrix);
+            matrix = math.mul(float4x4.Scale(cloudsAreaRange), matrix);
+
+            return matrix;
         }
 
-        public static float4x4 GetDensityObjectToWorldMatrix()
+        public static float4x4 GetDensityWorldToObject(float cloudsAreaRange)
         {
-            var trans = float4x4.Translate(math.float3(-0.5f, 0.0f, -0.5f));
-            var scale = float4x4.Scale(math.float3(2.0f, 1.0f, 2.0f));
-            return math.mul(scale, trans);
+            return math.inverse(GetDensityObjectToWorld(cloudsAreaRange));
         }
 
-        public static float4x4 GetDensityWorldToObjectMatrix()
+        public static float4x4 GetShadowsObjectToWorldMatrix(float cloudsLowerPlane, float cloudsUpperPlane, float cloudsAreaRange)
         {
-            return math.inverse(GetDensityObjectToWorldMatrix());
+            var matrix = float4x4.identity;
+
+            matrix = math.mul(float4x4.Translate(-0.5f), matrix);
+            matrix = math.mul(float4x4.Scale(math.float3(cloudsAreaRange, math.distance(cloudsLowerPlane, cloudsUpperPlane), cloudsAreaRange)), matrix);
+            matrix = math.mul(float4x4.Translate(math.up() * math.lerp(cloudsLowerPlane, cloudsUpperPlane, 0.5f)), matrix);
+
+            return matrix;
         }
 
-        public static float4x4 GetShadowsObjectToWorldMatrix(float areaScale)
+        public static float4x4 GetShadowsWorldToObjectMatrix(float cloudsLowerPlane, float cloudsUpperPlane, float cloudsAreaRange)
         {
-            var trans = float4x4.Translate(-0.5f);
-            var rotat = CloudsVolumeEnvironment.GetSunObjectToWorldMatrix();
-            var scale = float4x4.Scale(2.0f * areaScale);
-            return math.mul(rotat, math.mul(scale, trans));
-        }
-
-        public static float4x4 GetShadowsWorldToObjectMatrix(float areaScale)
-        {
-            return math.inverse(GetShadowsObjectToWorldMatrix(areaScale));
+            return math.inverse(GetShadowsObjectToWorldMatrix(cloudsLowerPlane, cloudsUpperPlane, cloudsAreaRange));
         }
 
         // ----------------------------------------------------

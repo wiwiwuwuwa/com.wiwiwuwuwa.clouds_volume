@@ -49,9 +49,9 @@ namespace Wiwiwuwuwa.CloudsVolume
             {
                 dimension = TextureDimension.Tex3D,
                 colorFormat = RenderTextureFormat.R8,
-                width = globalSettings.DensityTextureSize,
-                height = globalSettings.DensityTextureSize >> 1,
-                volumeDepth = globalSettings.DensityTextureSize,
+                width = globalSettings.CloudsTextureSize,
+                height = globalSettings.CloudsTextureSize,
+                volumeDepth = globalSettings.CloudsTextureSize,
                 bindMS = false,
                 msaaSamples = 1,
                 enableRandomWrite = true,
@@ -65,17 +65,15 @@ namespace Wiwiwuwuwa.CloudsVolume
 
             Defer(() => RenderTexture.ReleaseTemporary(densityTexture));
             densityTexture.filterMode = FilterMode.Bilinear;
-            densityTexture.wrapModeU = TextureWrapMode.Repeat;
-            densityTexture.wrapModeV = TextureWrapMode.Clamp;
-            densityTexture.wrapModeW = TextureWrapMode.Repeat;
+            densityTexture.wrapMode = TextureWrapMode.Repeat;
 
             var shadowsTexture = RenderTexture.GetTemporary(new RenderTextureDescriptor
             {
                 dimension = TextureDimension.Tex3D,
                 colorFormat = RenderTextureFormat.R8,
-                width = globalSettings.ShadowsTextureSize,
-                height = globalSettings.ShadowsTextureSize,
-                volumeDepth = globalSettings.ShadowsTextureSize,
+                width = globalSettings.ShadowTextureSize,
+                height = globalSettings.ShadowTextureSize,
+                volumeDepth = globalSettings.ShadowTextureSize,
                 bindMS = false,
                 msaaSamples = 1,
                 enableRandomWrite = true,
@@ -89,7 +87,7 @@ namespace Wiwiwuwuwa.CloudsVolume
 
             Defer(() => RenderTexture.ReleaseTemporary(shadowsTexture));
             shadowsTexture.filterMode = FilterMode.Bilinear;
-            shadowsTexture.wrapMode = TextureWrapMode.Clamp;
+            shadowsTexture.wrapMode = TextureWrapMode.Repeat;
 
             var densityCompute = new CloudsVolumeComputeDensity(globalSettings, densityTexture);
             if (densityCompute is null)
