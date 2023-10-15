@@ -25,7 +25,7 @@ namespace Wiwiwuwuwa.CloudsVolume
         float cloudsContrast = 0.5f;
 
         [SerializeField]
-        float cloudsMidpoint = 0.2f;
+        float cloudsMidpoint = 0.1f;
 
         [SerializeField]
         ComputeShader shadowShader = default;
@@ -40,22 +40,22 @@ namespace Wiwiwuwuwa.CloudsVolume
         float shadowDensity = 1f;
 
         [SerializeField]
-        ComputeShader cubemapShader = default;
+        ComputeShader skyboxShader = default;
 
         [SerializeField]
-        int cubemapTextureSize = 512;
+        int skyboxTextureSize = 512;
 
         [SerializeField]
-        int cubemapSamples = 32;
+        int skyboxSamples = 32;
 
         [SerializeField]
-        float cubemapDensity = 1f;
+        float skyboxDensity = 1f;
 
         [SerializeField]
-        ComputeShader cookiesShader = default;
+        ComputeShader cookieShader = default;
 
         [SerializeField]
-        int cookiesTextureSize = 128;
+        int cookieTextureSize = 128;
 
         // --------------------------------
 
@@ -73,7 +73,7 @@ namespace Wiwiwuwuwa.CloudsVolume
 
         public float CloudsContrast => cloudsContrast;
 
-        public float CloudsMidpoint => math.saturate(1f - cloudsMidpoint);
+        public float CloudsMidpoint => cloudsMidpoint;
 
         public ComputeShader ShadowShader => shadowShader;
 
@@ -83,17 +83,17 @@ namespace Wiwiwuwuwa.CloudsVolume
 
         public float ShadowDensity => shadowDensity;
 
-        public ComputeShader CubemapShader => cubemapShader;
+        public ComputeShader SkyboxShader => skyboxShader;
 
-        public int CubemapTextureSize => cubemapTextureSize;
+        public int SkyboxTextureSize => skyboxTextureSize;
 
-        public float CubemapSamples => cubemapSamples;
+        public float SkyboxSamples => skyboxSamples;
 
-        public float CubemapDensity => cubemapDensity;
+        public float SkyboxDensity => skyboxDensity;
 
-        public ComputeShader CookiesShader => cookiesShader;
+        public ComputeShader CookiesShader => cookieShader;
 
-        public int CookiesTextureSize => cookiesTextureSize;
+        public int CookieTextureSize => cookieTextureSize;
 
         // --------------------------------
 

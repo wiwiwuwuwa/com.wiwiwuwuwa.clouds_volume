@@ -20,15 +20,15 @@ MonoBehaviour:
     y: 160
     z: 160
     w: 192
-  cloudsContrast: 0.75
-  cloudsMidpoint: 0.25
+  cloudsContrast: 0.5
+  cloudsMidpoint: 0.1
   shadowShader: {fileID: 7200000, guid: 9b6e2894b8be00a4795eee2d98b1dd79, type: 3}
   shadowTextureSize: 128
   shadowSamples: 32
   shadowDensity: 1
-  cubemapShader: {fileID: 7200000, guid: 5ea96e2e7bc5c09488c3f846666b47fa, type: 3}
-  cubemapTextureSize: 512
-  cubemapSamples: 32
-  cubemapDensity: 1
-  cookiesShader: {fileID: 7200000, guid: b0f42889fc90fc348ae1fffa557f9806, type: 3}
-  cookiesTextureSize: 128
+  skyboxShader: {fileID: 7200000, guid: 5ea96e2e7bc5c09488c3f846666b47fa, type: 3}
+  skyboxTextureSize: 512
+  skyboxSamples: 32
+  skyboxDensity: 1
+  cookieShader: {fileID: 7200000, guid: b0f42889fc90fc348ae1fffa557f9806, type: 3}
+  cookieTextureSize: 128

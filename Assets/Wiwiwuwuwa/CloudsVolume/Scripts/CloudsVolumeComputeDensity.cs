@@ -11,6 +11,8 @@ namespace Wiwiwuwuwa.CloudsVolume
 
         const string SHADER_DENSITY_TEXTURE_PROPERTY = "_Wiwiw_DensityTexture";
 
+        // --------------------------------
+
         readonly CloudsVolumeGlobalSettings globalSettings = default;
 
         readonly RenderTexture densityTexture = default;

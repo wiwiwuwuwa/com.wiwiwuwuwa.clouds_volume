@@ -55,8 +55,8 @@ public class Test : MonoBehaviour
         {
             dimension = TextureDimension.Cube,
             colorFormat = RenderTextureFormat.ARGB32,
-            width = globalSettings.CubemapTextureSize,
-            height = globalSettings.CubemapTextureSize,
+            width = globalSettings.SkyboxTextureSize,
+            height = globalSettings.SkyboxTextureSize,
             volumeDepth = 1,
             bindMS = false,
             msaaSamples = 1,

@@ -113,8 +113,8 @@ namespace Wiwiwuwuwa.CloudsVolume
             {
                 dimension = TextureDimension.Cube,
                 colorFormat = RenderTextureFormat.ARGB32,
-                width = globalSettings.CubemapTextureSize,
-                height = globalSettings.CubemapTextureSize,
+                width = globalSettings.SkyboxTextureSize,
+                height = globalSettings.SkyboxTextureSize,
                 volumeDepth = 1,
                 bindMS = false,
                 msaaSamples = 1,
@@ -159,8 +159,8 @@ namespace Wiwiwuwuwa.CloudsVolume
             {
                 dimension = TextureDimension.Tex2D,
                 colorFormat = RenderTextureFormat.ARGB32,
-                width = globalSettings.CookiesTextureSize,
-                height = globalSettings.CookiesTextureSize,
+                width = globalSettings.CookieTextureSize,
+                height = globalSettings.CookieTextureSize,
                 volumeDepth = 1,
                 bindMS = false,
                 msaaSamples = 1,

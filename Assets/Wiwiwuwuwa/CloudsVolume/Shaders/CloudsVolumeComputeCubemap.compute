@@ -23,11 +23,11 @@ float _Wiwiw_CubemapFaceID;
 
 float3 _Wiwiw_CameraPosition;
 
-float _Wiwiw_CubemapSamplesCountVal;
+float _Wiwiw_SkyboxSamplesCountVal;
 
-float _Wiwiw_CubemapSamplesCountRcp;
+float _Wiwiw_SkyboxSamplesCountRcp;
 
-float _Wiwiw_CubemapDensity;
+float _Wiwiw_SkyboxDensity;
 
 // --------------------------------------------------------
 
@@ -81,15 +81,15 @@ void CSMain(in uint3 id : SV_DispatchThreadID)
     float color = 0.0;
     float alpha = 0.0;
 
-    for (float k = 0.0; k < _Wiwiw_CubemapSamplesCountVal; k++)
+    for (float k = 0.0; k < _Wiwiw_SkyboxSamplesCountVal; k++)
     {
-        const float3 samplePosWS = lerp(sampleStartPosWS, sampleFinalPosWS, k * _Wiwiw_CubemapSamplesCountRcp);
+        const float3 samplePosWS = lerp(sampleStartPosWS, sampleFinalPosWS, k * _Wiwiw_SkyboxSamplesCountRcp);
 
         const float clouds = Wiwiw_GetClouds(samplePosWS);
         const float shadow = Wiwiw_GetShadow(samplePosWS);
 
-        color = lerp(color, shadow, clouds * _Wiwiw_CubemapDensity);
-        alpha = lerp(alpha, 1.0, clouds * _Wiwiw_CubemapDensity);
+        color = lerp(color, shadow, clouds * _Wiwiw_SkyboxDensity);
+        alpha = lerp(alpha, 1.0, clouds * _Wiwiw_SkyboxDensity);
     }
 
     _Wiwiw_CubemapTexture[indexInCube] = isValid ? float4(color, alpha, 0.0, 0.0) : float4(0.0, 0.0, 0.0, 0.0);

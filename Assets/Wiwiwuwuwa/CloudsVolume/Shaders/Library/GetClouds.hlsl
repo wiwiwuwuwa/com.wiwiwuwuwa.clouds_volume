@@ -52,8 +52,8 @@ float Wiwiw_GetCloudsValue(in float3 inPosWS)
     const float3 noisePos = mul(_Wiwiw_DensityWorldToObjectMatrix, float4(inPosWS, 1.0)).xyz;
     const float noiseVal = _Wiwiw_DensityTexture.SampleLevel(sampler_Wiwiw_DensityTexture, noisePos, 0.0).r;
 
-    const float remapMin = lerp(0.0, _Wiwiw_CloudsMidpoint, _Wiwiw_CloudsContrast);
-    const float remapMax = lerp(1.0, _Wiwiw_CloudsMidpoint, _Wiwiw_CloudsContrast);
+    const float remapMin = lerp(0.0, 1.0 - _Wiwiw_CloudsMidpoint, _Wiwiw_CloudsContrast);
+    const float remapMax = lerp(1.0, 1.0 - _Wiwiw_CloudsMidpoint, _Wiwiw_CloudsContrast);
     const float remapVal = smoothstep(remapMin, remapMax, noiseVal);
 
     return remapVal;

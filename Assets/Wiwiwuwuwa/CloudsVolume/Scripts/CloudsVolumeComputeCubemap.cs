@@ -34,11 +34,11 @@ namespace Wiwiwuwuwa.CloudsVolume
 
         const string SHADER_CAMERA_POSITION_PROPERTY = "_Wiwiw_CameraPosition";
 
-        const string SHADER_CUBEMAP_SAMPLES_COUNT_VAL_PROPERTY = "_Wiwiw_CubemapSamplesCountVal";
+        const string SHADER_SKYBOX_SAMPLES_COUNT_VAL_PROPERTY = "_Wiwiw_SkyboxSamplesCountVal";
 
-        const string SHADER_CUBEMAP_SAMPLES_COUNT_RCP_PROPERTY = "_Wiwiw_CubemapSamplesCountRcp";
+        const string SHADER_SKYBOX_SAMPLES_COUNT_RCP_PROPERTY = "_Wiwiw_SkyboxSamplesCountRcp";
 
-        const string SHADER_CUBEMAP_DENSITY_PROPERTY = "_Wiwiw_CubemapDensity";
+        const string SHADER_SKYBOX_DENSITY_PROPERTY = "_Wiwiw_SkyboxDensity";
 
         // --------------------------------
 
@@ -86,26 +86,26 @@ namespace Wiwiwuwuwa.CloudsVolume
                 yield break;
             }
 
-            var cubemapShader = globalSettings.CubemapShader;
-            if (!cubemapShader)
+            var skyboxShader = globalSettings.SkyboxShader;
+            if (!skyboxShader)
             {
-                Debug.LogError($"({nameof(cubemapShader)}) is not valid");
+                Debug.LogError($"({nameof(skyboxShader)}) is not valid");
                 yield break;
             }
 
-            cubemapShader.SetTexture(default, SHADER_DENSITY_TEXTURE_PROPERTY, densityTexture);
-            cubemapShader.SetMatrix(SHADER_DENSITY_WORLD_TO_OBJECT_MATRIX_PROPERTY, CloudsVolumeMatrices.GetDensityWorldToObject(globalSettings.CloudsAreaRange));
-            cubemapShader.SetFloats(SHADER_CLOUDS_GRADIENT_PARAMS_PROPERTY, globalSettings.CloudsGradientParams);
-            cubemapShader.SetFloats(SHADER_CLOUDS_GRADIENT_VALUES_PROPERTY, math.float4(0f, 1f, 1f, 0f));
-            cubemapShader.SetFloat(SHADER_CLOUDS_CONTRAST_PROPERTY, globalSettings.CloudsContrast);
-            cubemapShader.SetFloat(SHADER_CLOUDS_MIDPOINT_PROPERTY, globalSettings.CloudsMidpoint);
-            cubemapShader.SetTexture(default, SHADER_SHADOWS_TEXTURE_PROPERTY, shadowsTexture);
-            cubemapShader.SetMatrix(SHADER_SHADOWS_WORLD_TO_OBJECT_MATRIX_PROPERTY, CloudsVolumeMatrices.GetShadowsWorldToObjectMatrix(globalSettings.CloudsGradientParams.x, globalSettings.CloudsGradientParams.w, globalSettings.CloudsAreaRange));
-            cubemapShader.SetVector(SHADER_SHADOW_DIRECTION_PROPERTY, CloudsVolumeEnvironment.GetSunForward());
-            cubemapShader.SetVector(SHADER_CAMERA_POSITION_PROPERTY, CloudsVolumeEnvironment.GetEyePosition());
-            cubemapShader.SetFloat(SHADER_CUBEMAP_SAMPLES_COUNT_VAL_PROPERTY, globalSettings.CubemapSamples);
-            cubemapShader.SetFloat(SHADER_CUBEMAP_SAMPLES_COUNT_RCP_PROPERTY, math.rcp(globalSettings.CubemapSamples));
-            cubemapShader.SetFloat(SHADER_CUBEMAP_DENSITY_PROPERTY, globalSettings.CubemapDensity);
+            skyboxShader.SetTexture(default, SHADER_DENSITY_TEXTURE_PROPERTY, densityTexture);
+            skyboxShader.SetMatrix(SHADER_DENSITY_WORLD_TO_OBJECT_MATRIX_PROPERTY, CloudsVolumeMatrices.GetDensityWorldToObject(globalSettings.CloudsAreaRange));
+            skyboxShader.SetFloats(SHADER_CLOUDS_GRADIENT_PARAMS_PROPERTY, globalSettings.CloudsGradientParams);
+            skyboxShader.SetFloats(SHADER_CLOUDS_GRADIENT_VALUES_PROPERTY, math.float4(0f, 1f, 1f, 0f));
+            skyboxShader.SetFloat(SHADER_CLOUDS_CONTRAST_PROPERTY, globalSettings.CloudsContrast);
+            skyboxShader.SetFloat(SHADER_CLOUDS_MIDPOINT_PROPERTY, globalSettings.CloudsMidpoint);
+            skyboxShader.SetTexture(default, SHADER_SHADOWS_TEXTURE_PROPERTY, shadowsTexture);
+            skyboxShader.SetMatrix(SHADER_SHADOWS_WORLD_TO_OBJECT_MATRIX_PROPERTY, CloudsVolumeMatrices.GetShadowsWorldToObjectMatrix(globalSettings.CloudsGradientParams.x, globalSettings.CloudsGradientParams.w, globalSettings.CloudsAreaRange));
+            skyboxShader.SetVector(SHADER_SHADOW_DIRECTION_PROPERTY, CloudsVolumeEnvironment.GetSunForward());
+            skyboxShader.SetVector(SHADER_CAMERA_POSITION_PROPERTY, CloudsVolumeEnvironment.GetEyePosition());
+            skyboxShader.SetFloat(SHADER_SKYBOX_SAMPLES_COUNT_VAL_PROPERTY, globalSettings.SkyboxSamples);
+            skyboxShader.SetFloat(SHADER_SKYBOX_SAMPLES_COUNT_RCP_PROPERTY, math.rcp(globalSettings.SkyboxSamples));
+            skyboxShader.SetFloat(SHADER_SKYBOX_DENSITY_PROPERTY, globalSettings.SkyboxDensity);
 
             for (var cubemapFaceID = 0; cubemapFaceID < 6; cubemapFaceID++)
             {
@@ -128,12 +128,12 @@ namespace Wiwiwuwuwa.CloudsVolume
                 }
 
                 Defer(() => RenderTexture.ReleaseTemporary(cubemapFaceTexture));
-                cubemapShader.SetTexture(default, SHADER_CUBEMAP_TEXTURE_PROPERTY, cubemapFaceTexture);
-                cubemapShader.SetFloat(SHADER_CUBEMAP_FACE_ID_PROPERTY, cubemapFaceID);
+                skyboxShader.SetTexture(default, SHADER_CUBEMAP_TEXTURE_PROPERTY, cubemapFaceTexture);
+                skyboxShader.SetFloat(SHADER_CUBEMAP_FACE_ID_PROPERTY, cubemapFaceID);
 
                 var dispatchYield = WaveFrontUtils.DispatchYield
                 (
-                    computeShader: cubemapShader,
+                    computeShader: skyboxShader,
                     bufferSize: math.int3(cubemapTexture.width, cubemapTexture.height, cubemapTexture.volumeDepth)
                 );
                 while (dispatchYield.MoveNext()) yield return default;
