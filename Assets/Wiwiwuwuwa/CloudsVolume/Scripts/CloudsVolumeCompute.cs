@@ -87,7 +87,9 @@ namespace Wiwiwuwuwa.CloudsVolume
 
             Defer(() => RenderTexture.ReleaseTemporary(shadowsTexture));
             shadowsTexture.filterMode = FilterMode.Bilinear;
-            shadowsTexture.wrapMode = TextureWrapMode.Repeat;
+            shadowsTexture.wrapModeU = TextureWrapMode.Repeat;
+            shadowsTexture.wrapModeV = TextureWrapMode.Clamp;
+            shadowsTexture.wrapModeW = TextureWrapMode.Repeat;
 
             var densityCompute = new CloudsVolumeComputeDensity(globalSettings, densityTexture);
             if (densityCompute is null)
