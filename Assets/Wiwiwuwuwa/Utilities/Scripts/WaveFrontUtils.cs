@@ -1,38 +1,40 @@
+using System.Collections;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using Unity.Mathematics;
-using System.Collections;
 
 namespace Wiwiwuwuwa.Utilities
 {
-    public static class WaveFrontUtils
+    public static class WavefrontUtils
     {
-        // ----------------------------------------------------
+        // ------------------------------------------------
 
-        const int THREADS_PER_DISPATCH = 128 * 128;
+        const int DEFAULT_DISPATCH_SIZE = 128 * 128;
 
         const string SHADER_KERNEL_NAME = "CSMain";
 
-        const string SHADER_THREADS_PER_WAVE_KEYWORD = "WIWIW_THREADS_PER_WAVE";
+        const string SHADER_WAVEFRONT_SIZE_KEYWORD = "WIWIW_WAVEFRONT_SIZE";
 
-        const string SHADER_BUFFER_INFO_PROPERTY = "_Wiwiw_BufferInfo";
+        const string SHADER_BUFFER_SIZE_INT3_PROPERTY = "_Wiwiw_BufferSizeInt3";
 
-        const string SHADER_BUFFER_INFO_VAL_PROPERTY = "_Wiwiw_BufferInfoVal";
+        const string SHADER_BUFFER_SIZE_FLT3_PROPERTY = "_Wiwiw_BufferSizeFlt3";
 
-        const string SHADER_BUFFER_INFO_INV_PROPERTY = "_Wiwiw_BufferInfoInv";
+        const string SHADER_BUFFER_SIZE_RCP3_PROPERTY = "_Wiwiw_BufferSizeRcp3";
 
-        const string SHADER_THREAD_INFO_PROPERTY = "_Wiwiw_ThreadInfo";
+        const string SHADER_THREAD_OFFSET_PROPERTY = "_Wiwiw_ThreadOffset";
 
-        static readonly Regex REGEX_THREAD_PER_WAVE_PATTERN = new
+        // ----------------------------
+
+        static readonly Regex REGEX_WAVEFRONT_SIZE_PATTERN = new
         (
-            pattern: SHADER_THREADS_PER_WAVE_KEYWORD + @"_(\d+)",
+            pattern: SHADER_WAVEFRONT_SIZE_KEYWORD + @"_(\d+)",
             options: RegexOptions.ECMAScript | RegexOptions.IgnoreCase | RegexOptions.Multiline | RegexOptions.Compiled
         );
 
-        // --------------------------------
+        // ----------------------------
 
-        public static IEnumerator DispatchYield(ComputeShader computeShader, int3 bufferSize, int? sliceIndex = default, int? sliceCount = default)
+        public static IEnumerator DispatchYield(ComputeShader computeShader, int3 bufferSize, int? dispatchSize = default, int? sliceIndex = default, int? sliceCount = default)
         {
             if (!computeShader)
             {
@@ -43,6 +45,12 @@ namespace Wiwiwuwuwa.Utilities
             if (math.any(bufferSize <= default(int)))
             {
                 Debug.LogError($"({nameof(bufferSize)}) is not valid");
+                yield break;
+            }
+
+            if (dispatchSize.HasValue && dispatchSize <= default(int))
+            {
+                Debug.LogError($"({nameof(dispatchSize)}) is not valid");
                 yield break;
             }
 
@@ -64,68 +72,63 @@ namespace Wiwiwuwuwa.Utilities
                 yield break;
             }
 
-            var linearBufferSize = bufferSize.x * bufferSize.y * bufferSize.z;
-            if (linearBufferSize <= default(int))
-            {
-                Debug.LogError($"({nameof(linearBufferSize)}) is not valid");
-                yield break;
-            }
-
             var kernelIndex = computeShader.FindKernel(SHADER_KERNEL_NAME);
             if (kernelIndex < default(int))
             {
-                Debug.LogError($"No ({SHADER_KERNEL_NAME}) kernel found in ({nameof(computeShader)})");
+                Debug.LogError($"({nameof(kernelIndex)}) is not valid");
                 yield break;
             }
 
-            var threadsPerWave = GetThreadsPerWave(computeShader);
-            if (threadsPerWave <= default(int))
+            var wavefrontSize = GetWavefrontSize(computeShader);
+            if (wavefrontSize <= default(int))
             {
-                Debug.LogError($"({nameof(threadsPerWave)}) is not valid");
+                Debug.LogError($"({nameof(wavefrontSize)}) is not valid");
                 yield break;
             }
 
-            var threadsPerWaveTag = $"{SHADER_THREADS_PER_WAVE_KEYWORD}_{threadsPerWave}";
-            if (string.IsNullOrEmpty(threadsPerWaveTag))
+            var wavefrontKeyword = $"{SHADER_WAVEFRONT_SIZE_KEYWORD}_{wavefrontSize}";
+            if (string.IsNullOrEmpty(wavefrontKeyword))
             {
-                Debug.LogError($"({nameof(threadsPerWaveTag)}) is not valid");
+                Debug.LogError($"({nameof(wavefrontKeyword)}) is not valid");
                 yield break;
             }
 
-            var sliceSize = bufferSize.x * bufferSize.y;
-            var startThreadOffset = sliceIndex.HasValue ? sliceIndex.Value * sliceSize : default;
-            var finalThreadOffset = sliceCount.HasValue ? startThreadOffset + sliceCount.Value * sliceSize : linearBufferSize;
+            computeShader.EnableKeyword(wavefrontKeyword);
 
-            computeShader.EnableKeyword(threadsPerWaveTag);
+            var linearDispatchSize = dispatchSize ?? DEFAULT_DISPATCH_SIZE;
+            var linearBufferSize = bufferSize.x * bufferSize.y * bufferSize.z;
+            var linearSliceSize = bufferSize.x * bufferSize.y;
+            var threadIndexStart = sliceIndex.HasValue ? sliceIndex.Value * linearSliceSize : default;
+            var threadIndexFinal = sliceCount.HasValue ? threadIndexStart + sliceCount.Value * linearSliceSize : linearBufferSize;
 
-            for (var threadOffset = startThreadOffset; threadOffset < finalThreadOffset; threadOffset += THREADS_PER_DISPATCH)
+            for (var threadOffset = threadIndexStart; threadOffset < threadIndexFinal; threadOffset += linearDispatchSize)
             {
-                var threadsCount = math.min(THREADS_PER_DISPATCH, finalThreadOffset - threadOffset);
-                if (threadsCount <= default(int))
+                var threadCount = math.min(linearDispatchSize, threadIndexFinal - threadOffset);
+                if (threadCount <= default(int))
                 {
-                    Debug.LogError($"({nameof(threadsCount)}) is not valid");
+                    Debug.LogError($"({nameof(threadCount)}) is not valid");
                     yield break;
                 }
 
-                var groupsCount = (threadsCount + threadsPerWave - 1) / threadsPerWave;
+                var groupsCount = (threadCount + wavefrontSize - 1) / wavefrontSize;
                 if (groupsCount <= default(int))
                 {
                     Debug.LogError($"({nameof(groupsCount)}) is not valid");
                     yield break;
                 }
 
-                computeShader.SetInts(SHADER_BUFFER_INFO_PROPERTY, bufferSize.x, bufferSize.y, bufferSize.z, linearBufferSize);
-                computeShader.SetFloats(SHADER_BUFFER_INFO_VAL_PROPERTY, bufferSize.x, bufferSize.y, bufferSize.z, linearBufferSize);
-                computeShader.SetFloats(SHADER_BUFFER_INFO_INV_PROPERTY, math.rcp(bufferSize.x), math.rcp(bufferSize.y), math.rcp(bufferSize.z), math.rcp(linearBufferSize));
-                computeShader.SetInts(SHADER_THREAD_INFO_PROPERTY, threadOffset, threadsCount, groupsCount, default);
+                computeShader.SetInts(SHADER_BUFFER_SIZE_INT3_PROPERTY, bufferSize.x, bufferSize.y, bufferSize.z);
+                computeShader.SetFloats(SHADER_BUFFER_SIZE_FLT3_PROPERTY, bufferSize.x, bufferSize.y, bufferSize.z);
+                computeShader.SetFloats(SHADER_BUFFER_SIZE_RCP3_PROPERTY, math.rcp(bufferSize.x), math.rcp(bufferSize.y), math.rcp(bufferSize.z));
+                computeShader.SetInt(SHADER_THREAD_OFFSET_PROPERTY, threadOffset);
                 computeShader.Dispatch(kernelIndex, groupsCount, 1, 1);
                 yield return default;
             }
         }
 
-        // --------------------------------
+        // ----------------------------
 
-        static int GetThreadsPerWave(ComputeShader computeShader)
+        static int GetWavefrontSize(ComputeShader computeShader)
         {
             if (!computeShader)
             {
@@ -134,13 +137,13 @@ namespace Wiwiwuwuwa.Utilities
             }
 
             return computeShader.keywordSpace.keywordNames
-                .Select(keyword => REGEX_THREAD_PER_WAVE_PATTERN.Match(keyword))
+                .Select(keyword => REGEX_WAVEFRONT_SIZE_PATTERN.Match(keyword))
                 .Where(match => match.Success)
                 .Select(match => int.Parse(match.Groups[1].Value))
                 .OrderByDescending(threads => threads)
                 .FirstOrDefault(threads => threads <= SystemInfo.computeSubGroupSize);
         }
 
-        // --------------------------------
+        // ------------------------------------------------
     }
 }
