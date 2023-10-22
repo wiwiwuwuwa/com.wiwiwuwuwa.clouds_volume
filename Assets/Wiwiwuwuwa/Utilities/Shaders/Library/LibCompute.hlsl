@@ -17,6 +17,8 @@
     #define WIWIW_NUMTHREADS [numthreads(32, 1, 1)]
 #elif defined(WIWIW_WAVEFRONT_SIZE_64)
     #define WIWIW_NUMTHREADS [numthreads(64, 1, 1)]
+#else
+    #error "WIWIW_WAVEFRONT_SIZE is not defined"
 #endif
 
 // --------------------------------------------------------

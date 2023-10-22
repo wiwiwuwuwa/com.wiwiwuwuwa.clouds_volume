@@ -1,0 +1,20 @@
+#pragma kernel CSMain
+#pragma multi_compile_local WIWIW_WAVEFRONT_SIZE_16 WIWIW_WAVEFRONT_SIZE_32 WIWIW_WAVEFRONT_SIZE_64
+
+// --------------------------------------------------------
+
+#include "../../Utilities/Shaders/Library/LibCompute.hlsl"
+
+// --------------------------------------------------------
+
+RWTexture2D<float4> _Wiwiw_CookiesTexture;
+
+// --------------------------------------------------------
+
+WIWIW_NUMTHREADS
+void CSMain(in uint3 id : SV_DispatchThreadID)
+{
+
+}
+
+// --------------------------------------------------------

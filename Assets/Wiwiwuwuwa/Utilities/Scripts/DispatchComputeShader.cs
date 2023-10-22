@@ -6,7 +6,7 @@ using Unity.Mathematics;
 
 namespace Wiwiwuwuwa.Utilities
 {
-    public static class WavefrontUtils
+    public class DispatchComputeShader : ComputeOperation
     {
         // ------------------------------------------------
 
@@ -34,7 +34,35 @@ namespace Wiwiwuwuwa.Utilities
 
         // ----------------------------
 
-        public static IEnumerator DispatchYield(ComputeShader computeShader, int3 bufferSize, int? dispatchSize = default, int? sliceIndex = default, int? sliceCount = default)
+        readonly ComputeShader computeShader = default;
+
+        readonly int3 bufferSize = default;
+
+        readonly int? dispatchSize = default;
+
+        readonly int? sliceIndex = default;
+
+        readonly int? sliceCount = default;
+
+        // ----------------------------
+
+        public DispatchComputeShader
+        (
+            ComputeShader computeShader,
+            int3 bufferSize,
+            int? dispatchSize = default,
+            int? sliceIndex = default,
+            int? sliceCount = default
+        )
+        {
+            this.computeShader = computeShader;
+            this.bufferSize = bufferSize;
+            this.dispatchSize = dispatchSize;
+            this.sliceIndex = sliceIndex;
+            this.sliceCount = sliceCount;
+        }
+
+        protected override IEnumerator Execute()
         {
             if (!computeShader)
             {

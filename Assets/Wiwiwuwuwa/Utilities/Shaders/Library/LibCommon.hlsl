@@ -5,7 +5,7 @@
 // Math
 // --------------------------------------------------------
 
-uint3 Wiwiw_Get3DFrom1D(in uint inCoord, in uint inWidth, in uint in Height)
+uint3 Wiwiw_Get3DFrom1D(in uint inCoord, in uint inWidth, in uint inHeight)
 {
     uint3 outCoord = 0;
 	outCoord.x = inCoord % inWidth;
