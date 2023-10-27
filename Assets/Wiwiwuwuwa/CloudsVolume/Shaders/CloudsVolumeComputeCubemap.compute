@@ -4,6 +4,7 @@
 // --------------------------------------------------------
 
 #include "../../Utilities/Shaders/Library/LibCompute.hlsl"
+#include "Library/LibClouds.hlsl"
 
 // --------------------------------------------------------
 
@@ -11,12 +12,20 @@ RWTexture2D<float4> _Wiwiw_CubemapFaceTexture;
 
 int _Wiwiw_CubemapFaceIndex;
 
+float3 _Wiwiw_CameraPosition;
+
 // --------------------------------------------------------
 
 WIWIW_NUMTHREADS
 void CSMain(in uint3 id : SV_DispatchThreadID)
 {
+    const uint2 indexInFace = Wiwiw_GetThreadIndex3D(id).xy;
+    const float2 coordInFace = Wiwiw_Remap(Wiwiw_GetThreadCoord3D(id).xy, float2(0.0, 0.0), float2(1.0, 1.0), float2(0.0, 1.0), float2(1.0, 0.0));
 
+    const float3 viewPosWS = _Wiwiw_CameraPosition;
+    const float3 viewDirWS = normalize(Wiwiw_Remap(Wiwiw_GetPointOnCubemap(coordInFace, _Wiwiw_CubemapFaceIndex), 0.0, 1.0, -1.0, 1.0));
+
+    _Wiwiw_CubemapFaceTexture[indexInFace] = float4(Wiwiw_LibClouds_IntegrateClouds(viewPosWS, viewDirWS), 0.0, 0.0, 0.0);
 }
 
 // --------------------------------------------------------

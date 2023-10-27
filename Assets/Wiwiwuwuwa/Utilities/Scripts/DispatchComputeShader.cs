@@ -10,7 +10,7 @@ namespace Wiwiwuwuwa.Utilities
     {
         // ------------------------------------------------
 
-        const int DEFAULT_DISPATCH_SIZE = 128 * 128;
+        const int DEFAULT_DISPATCH_SIZE = 64 * 64;
 
         const string SHADER_KERNEL_NAME = "CSMain";
 

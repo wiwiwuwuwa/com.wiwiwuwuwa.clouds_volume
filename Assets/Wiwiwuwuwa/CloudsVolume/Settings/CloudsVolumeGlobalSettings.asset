@@ -13,4 +13,37 @@ MonoBehaviour:
   m_Name: CloudsVolumeGlobalSettings
   m_EditorClassIdentifier: 
   cubemapShader: {fileID: 7200000, guid: 41596a224ccb74841bb13cde44bdaa69, type: 3}
+  cubemapTextureSize: 512
   cookiesShader: {fileID: 7200000, guid: 5f1c685d3c06ac146adcc012ba9012ca, type: 3}
+  cookiesTextureSize: 512
+  densityTexture: {fileID: 11700000, guid: ae3cc47d39f37bb418cc658c145281c2, type: 2}
+  densityScale:
+    x: 4096
+    y: 512
+    z: 128
+    w: 32
+  densityContrast:
+    x: 0.75
+    y: 0.5
+    z: 0.5
+    w: 0.5
+  densityMidpoint:
+    x: 0.25
+    y: 0.25
+    z: 0.25
+    w: 0.25
+  gradientPoints:
+    x: 0
+    y: 0.25
+    z: 0.5
+    w: 1
+  gradientColors:
+    x: 0
+    y: 1
+    z: 1
+    w: 0
+  cloudsHeightMin: 128
+  cloudsHeightMax: 256
+  cloudsSampleDensity: 0.01
+  cloudsSampleDistance: 256
+  cloudsSampleNumber: 32

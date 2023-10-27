@@ -13,6 +13,32 @@ namespace Wiwiwuwuwa.CloudsVolume
 
         const string SHADER_CUBEMAP_FACE_INDEX_PROPERTY = "_Wiwiw_CubemapFaceIndex";
 
+        const string SHADER_LIB_CLOUDS_DENSITY_TEXTURE_PROPERTY = "_Wiwiw_LibClouds_DensityTexture";
+
+        const string SHADER_LIB_CLOUDS_DENSITY_MULTIPLY_PROPERTY = "_Wiwiw_LibClouds_DensityMultiply";
+
+        const string SHADER_LIB_CLOUDS_DENSITY_CONTRAST_PROPERTY = "_Wiwiw_LibClouds_DensityContrast";
+
+        const string SHADER_LIB_CLOUDS_DENSITY_MIDPOINT_PROPERTY = "_Wiwiw_LibClouds_DensityMidpoint";
+
+        const string SHADER_LIB_CLOUDS_GRADIENT_POINTS_PROPERTY = "_Wiwiw_LibClouds_GradientPoints";
+
+        const string SHADER_LIB_CLOUDS_GRADIENT_COLORS_PROPERTY = "_Wiwiw_LibClouds_GradientColors";
+
+        const string SHADER_LIB_CLOUDS_CLOUDS_HEIGHT_MIN_PROPERTY = "_Wiwiw_LibClouds_CloudsHeightMin";
+
+        const string SHADER_LIB_CLOUDS_CLOUDS_HEIGHT_MAX_PROPERTY = "_Wiwiw_LibClouds_CloudsHeightMax";
+
+        const string SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_STEP_DENSITY_PROPERTY = "_Wiwiw_LibClouds_CloudsSampleStepDensity";
+
+        const string SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_FULL_DISTANCE_PROPERTY = "_Wiwiw_LibClouds_CloudsSampleFullDistance";
+
+        const string SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_NUMBER_FLT_PROPERTY = "_Wiwiw_LibClouds_CloudsSampleNumberFlt";
+
+        const string SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_NUMBER_RCP_PROPERTY = "_Wiwiw_LibClouds_CloudsSampleNumberRcp";
+
+        const string SHADER_CAMERA_POSITION_PROPERTY = "_Wiwiw_CameraPosition";
+
         // ----------------------------
 
         readonly CloudsVolumeGlobalSettings globalSettings = default;
@@ -35,18 +61,37 @@ namespace Wiwiwuwuwa.CloudsVolume
                 yield break;
             }
 
+            if (!globalSettings.CubemapShader)
+            {
+                Debug.LogError($"({nameof(globalSettings.CubemapShader)}) is not valid");
+                yield break;
+            }
+
+            if (!globalSettings.DensityTexture)
+            {
+                Debug.LogError($"({nameof(globalSettings.DensityTexture)}) is not valid");
+                yield break;
+            }
+
             if (!cubemapTexture)
             {
                 Debug.LogError($"({nameof(cubemapTexture)}) is not valid");
                 yield break;
             }
 
-            var cubemapShader = globalSettings.CubemapShader;
-            if (!cubemapShader)
-            {
-                Debug.LogError($"({nameof(cubemapShader)}) is not valid");
-                yield break;
-            }
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_DENSITY_TEXTURE_PROPERTY, globalSettings.DensityTexture);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_DENSITY_MULTIPLY_PROPERTY, globalSettings.DensityMultiply);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_DENSITY_CONTRAST_PROPERTY, globalSettings.DensityContrast);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_DENSITY_MIDPOINT_PROPERTY, globalSettings.DensityMidpoint);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_GRADIENT_POINTS_PROPERTY, globalSettings.GradientPoints);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_GRADIENT_COLORS_PROPERTY, globalSettings.GradientColors);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_HEIGHT_MIN_PROPERTY, globalSettings.CloudsHeightMin);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_HEIGHT_MAX_PROPERTY, globalSettings.CloudsHeightMax);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_STEP_DENSITY_PROPERTY, globalSettings.CloudsSampleStepDensity);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_FULL_DISTANCE_PROPERTY, globalSettings.CloudsSampleFullDistance);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_NUMBER_FLT_PROPERTY, globalSettings.CloudsSampleNumberFlt);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_NUMBER_RCP_PROPERTY, globalSettings.CloudsSampleNumberRcp);
+            globalSettings.CubemapShader.SetValues(SHADER_CAMERA_POSITION_PROPERTY, CloudsVolumeObjects.CameraPosition);
 
             for (var cubemapFaceIndex = 0; cubemapFaceIndex < 6; cubemapFaceIndex++)
             {
@@ -70,10 +115,10 @@ namespace Wiwiwuwuwa.CloudsVolume
 
                 Defer(() => RenderTexture.ReleaseTemporary(cubemapFaceTexture));
 
-                cubemapShader.SetTexture(default, SHADER_CUBEMAP_FACE_TEXTURE_PROPERTY, cubemapFaceTexture);
-                cubemapShader.SetInt(SHADER_CUBEMAP_FACE_INDEX_PROPERTY, cubemapFaceIndex);
+                globalSettings.CubemapShader.SetValues(SHADER_CUBEMAP_FACE_TEXTURE_PROPERTY, cubemapFaceTexture);
+                globalSettings.CubemapShader.SetValues(SHADER_CUBEMAP_FACE_INDEX_PROPERTY, cubemapFaceIndex);
 
-                var dispatchOperation = new DispatchComputeShader(cubemapShader, cubemapTexture.GetSize());
+                var dispatchOperation = new DispatchComputeShader(globalSettings.CubemapShader, cubemapTexture.GetSize());
                 if (dispatchOperation is null)
                 {
                     Debug.LogError($"({nameof(dispatchOperation)}) is not valid");

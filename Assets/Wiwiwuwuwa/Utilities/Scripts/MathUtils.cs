@@ -36,5 +36,12 @@ namespace Wiwiwuwuwa.Utilities
         }
 
         // ------------------------------------------------
+
+        public static float[] ToArray(this float4 val)
+        {
+            return new[] { val.x, val.y, val.z, val.w };
+        }
+
+        // ------------------------------------------------
     }
 }
