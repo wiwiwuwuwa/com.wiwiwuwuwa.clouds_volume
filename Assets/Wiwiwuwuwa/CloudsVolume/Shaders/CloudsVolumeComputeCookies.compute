@@ -1,17 +1,11 @@
 #pragma kernel CSMain
-#pragma multi_compile_local WIWIW_THREADS_PER_WAVE_32 WIWIW_THREADS_PER_WAVE_64
+#pragma multi_compile_local WIWIW_WAVEFRONT_SIZE_16 WIWIW_WAVEFRONT_SIZE_32 WIWIW_WAVEFRONT_SIZE_64
 
 // --------------------------------------------------------
 
-#include "../../Utilities/Shaders/Library/GetFadeGradient.hlsl"
-#include "../../Utilities/Shaders/Library/GetGlobalBufferCoord3D.hlsl"
-#include "../../Utilities/Shaders/Library/WaveFrontMultiCompile.hlsl"
+#include "../../Utilities/Shaders/Library/LibCompute.hlsl"
 
 // --------------------------------------------------------
-
-Texture3D<float1> _Wiwiw_ShadowsTexture;
-
-SamplerState sampler_Wiwiw_ShadowsTexture;
 
 RWTexture2D<float4> _Wiwiw_CookiesTexture;
 
@@ -20,13 +14,7 @@ RWTexture2D<float4> _Wiwiw_CookiesTexture;
 WIWIW_NUMTHREADS
 void CSMain(in uint3 id : SV_DispatchThreadID)
 {
-    const uint2 cookiesPixcoord = Wiwiw_GetGlobalBufferIndex3D(id.x).xy;
-    const float2 cookiesTexcoord = Wiwiw_GetGlobalBufferCoord3D(id.x).xy;
-    const float3 shadowsTexcoord = float3(cookiesTexcoord, 1.0);
-    const float shadowsSampleVal = _Wiwiw_ShadowsTexture.SampleLevel(sampler_Wiwiw_ShadowsTexture, shadowsTexcoord, 0.0).r;
-    const float shadowsFadingVal = Wiwiw_GetFadeGradient(cookiesTexcoord - 0.5, 0.0, 0.0, 0.5, 1.0);
 
-    _Wiwiw_CookiesTexture[cookiesPixcoord] = lerp(shadowsSampleVal, 1.0, shadowsFadingVal);
 }
 
 // --------------------------------------------------------

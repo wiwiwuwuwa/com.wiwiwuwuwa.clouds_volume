@@ -1,48 +1,57 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Unity.Mathematics;
 using Wiwiwuwuwa.Utilities;
 
 namespace Wiwiwuwuwa.CloudsVolume
 {
     public class CloudsVolumeComputeCubemap : ComputeOperation
     {
-        // ----------------------------------------------------
+        // ------------------------------------------------
 
-        const string SHADER_DENSITY_TEXTURE_PROPERTY = "_Wiwiw_DensityTexture";
+        const string SHADER_CUBEMAP_FACE_TEXTURE_PROPERTY = "_Wiwiw_CubemapFaceTexture";
 
-        const string SHADER_DENSITY_WORLD_TO_OBJECT_MATRIX_PROPERTY = "_Wiwiw_DensityWorldToObjectMatrix";
+        const string SHADER_CUBEMAP_FACE_INDEX_PROPERTY = "_Wiwiw_CubemapFaceIndex";
 
-        const string SHADER_SHADOWS_TEXTURE_PROPERTY = "_Wiwiw_ShadowsTexture";
+        const string SHADER_LIB_CLOUDS_DENSITY_TEXTURE_PROPERTY = "_Wiwiw_LibClouds_DensityTexture";
 
-        const string SHADER_SHADOWS_WORLD_TO_OBJECT_MATRIX_PROPERTY = "_Wiwiw_ShadowsWorldToObjectMatrix";
+        const string SHADER_LIB_CLOUDS_DENSITY_MULTIPLY_PROPERTY = "_Wiwiw_LibClouds_DensityMultiply";
 
-        const string SHADER_DENSITY_PARAMS_PROPERTY = "_Wiwiw_DensityParams";
+        const string SHADER_LIB_CLOUDS_DENSITY_CONTRAST_PROPERTY = "_Wiwiw_LibClouds_DensityContrast";
 
-        const string SHADER_CUBEMAP_PARAMS_PROPERTY = "_Wiwiw_CubemapParams";
+        const string SHADER_LIB_CLOUDS_DENSITY_MIDPOINT_PROPERTY = "_Wiwiw_LibClouds_DensityMidpoint";
 
-        const string SHADER_CUBEMAP_TEXTURE_PROPERTY = "_Wiwiw_CubemapTexture";
+        const string SHADER_LIB_CLOUDS_GRADIENT_POINTS_PROPERTY = "_Wiwiw_LibClouds_GradientPoints";
 
-        const string SHADER_CUBEMAP_FACE_ID_PROPERTY = "_Wiwiw_CubemapFaceID";
+        const string SHADER_LIB_CLOUDS_GRADIENT_COLORS_PROPERTY = "_Wiwiw_LibClouds_GradientColors";
 
-        const string SHADER_SUN_DIR_PROPERTY = "_Wiwiw_SunDir";
+        const string SHADER_LIB_CLOUDS_CLOUDS_HEIGHT_MIN_PROPERTY = "_Wiwiw_LibClouds_CloudsHeightMin";
+
+        const string SHADER_LIB_CLOUDS_CLOUDS_HEIGHT_MAX_PROPERTY = "_Wiwiw_LibClouds_CloudsHeightMax";
+
+        const string SHADER_LIB_CLOUDS_BENT_NORMAL_SCALE_PROPERTY = "_Wiwiw_LibClouds_BentNormalScale";
+
+        const string SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_STEP_DENSITY_PROPERTY = "_Wiwiw_LibClouds_CloudsSampleStepDensity";
+
+        const string SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_FULL_DISTANCE_PROPERTY = "_Wiwiw_LibClouds_CloudsSampleFullDistance";
+
+        const string SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_NUMBER_FLT_PROPERTY = "_Wiwiw_LibClouds_CloudsSampleNumberFlt";
+
+        const string SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_NUMBER_RCP_PROPERTY = "_Wiwiw_LibClouds_CloudsSampleNumberRcp";
+
+        const string SHADER_CAMERA_POSITION_PROPERTY = "_Wiwiw_CameraPosition";
+
+        // ----------------------------
 
         readonly CloudsVolumeGlobalSettings globalSettings = default;
 
-        readonly RenderTexture densityTexture = default;
-
-        readonly RenderTexture shadowsTexture = default;
-
         readonly RenderTexture cubemapTexture = default;
 
-        // --------------------------------
+        // ----------------------------
 
-        public CloudsVolumeComputeCubemap(CloudsVolumeGlobalSettings globalSettings, RenderTexture densityTexture, RenderTexture shadowsTexture, RenderTexture cubemapTexture)
+        public CloudsVolumeComputeCubemap(CloudsVolumeGlobalSettings globalSettings, RenderTexture cubemapTexture)
         {
             this.globalSettings = globalSettings;
-            this.densityTexture = densityTexture;
-            this.shadowsTexture = shadowsTexture;
             this.cubemapTexture = cubemapTexture;
         }
 
@@ -54,15 +63,15 @@ namespace Wiwiwuwuwa.CloudsVolume
                 yield break;
             }
 
-            if (!densityTexture)
+            if (!globalSettings.CubemapShader)
             {
-                Debug.LogError($"({nameof(densityTexture)}) is not valid");
+                Debug.LogError($"({nameof(globalSettings.CubemapShader)}) is not valid");
                 yield break;
             }
 
-            if (!shadowsTexture)
+            if (!globalSettings.DensityTexture)
             {
-                Debug.LogError($"({nameof(shadowsTexture)}) is not valid");
+                Debug.LogError($"({nameof(globalSettings.DensityTexture)}) is not valid");
                 yield break;
             }
 
@@ -72,34 +81,22 @@ namespace Wiwiwuwuwa.CloudsVolume
                 yield break;
             }
 
-            var cubemapComputeShader = globalSettings.CubemapComputeShader;
-            if (!cubemapComputeShader)
-            {
-                Debug.LogError($"({nameof(cubemapComputeShader)}) is not valid");
-                yield break;
-            }
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_DENSITY_TEXTURE_PROPERTY, globalSettings.DensityTexture);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_DENSITY_MULTIPLY_PROPERTY, globalSettings.DensityMultiply);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_DENSITY_CONTRAST_PROPERTY, globalSettings.DensityContrast);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_DENSITY_MIDPOINT_PROPERTY, globalSettings.DensityMidpoint);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_GRADIENT_POINTS_PROPERTY, globalSettings.GradientPoints);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_GRADIENT_COLORS_PROPERTY, globalSettings.GradientColors);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_HEIGHT_MIN_PROPERTY, globalSettings.CloudsHeightMin);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_HEIGHT_MAX_PROPERTY, globalSettings.CloudsHeightMax);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_BENT_NORMAL_SCALE_PROPERTY, globalSettings.BentNormalScale);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_STEP_DENSITY_PROPERTY, globalSettings.CloudsSampleStepDensity);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_FULL_DISTANCE_PROPERTY, globalSettings.CloudsSampleFullDistance);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_NUMBER_FLT_PROPERTY, globalSettings.CloudsSampleNumberFlt);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_NUMBER_RCP_PROPERTY, globalSettings.CloudsSampleNumberRcp);
+            globalSettings.CubemapShader.SetValues(SHADER_CAMERA_POSITION_PROPERTY, CloudsVolumeObjects.CameraPosition);
 
-            cubemapComputeShader.SetTexture(default, SHADER_DENSITY_TEXTURE_PROPERTY, densityTexture);
-            cubemapComputeShader.SetMatrix(SHADER_DENSITY_WORLD_TO_OBJECT_MATRIX_PROPERTY, ClodusVolumeMatrices.GetDensityWorldToObjectMatrix());
-            cubemapComputeShader.SetTexture(default, SHADER_SHADOWS_TEXTURE_PROPERTY, shadowsTexture);
-            cubemapComputeShader.SetMatrix(SHADER_SHADOWS_WORLD_TO_OBJECT_MATRIX_PROPERTY, ClodusVolumeMatrices.GetShadowsWorldToObjectMatrix(globalSettings.ShadowsAreaScale));
-            cubemapComputeShader.SetVector(SHADER_DENSITY_PARAMS_PROPERTY, math.float4
-            (
-                x: globalSettings.DensityFadeInStartPos,
-                y: globalSettings.DensityFadeOutFinalPos,
-                z: default,
-                w: default
-            ));
-            cubemapComputeShader.SetVector(SHADER_CUBEMAP_PARAMS_PROPERTY, math.float4
-            (
-                x: globalSettings.CubemapSamples,
-                y: math.rcp(globalSettings.CubemapSamples),
-                z: globalSettings.CubemapDensity,
-                w: default
-            ));
-            cubemapComputeShader.SetVector(SHADER_SUN_DIR_PROPERTY, math.float4(CloudsVolumeEnvironment.GetSunForwardVector(), 0f));
-
-            for (var cubemapFaceID = 0; cubemapFaceID < 6; cubemapFaceID++)
+            for (var cubemapFaceIndex = 0; cubemapFaceIndex < 6; cubemapFaceIndex++)
             {
                 var cubemapFaceTexture = RenderTexture.GetTemporary(new RenderTextureDescriptor
                 {
@@ -120,15 +117,18 @@ namespace Wiwiwuwuwa.CloudsVolume
                 }
 
                 Defer(() => RenderTexture.ReleaseTemporary(cubemapFaceTexture));
-                cubemapComputeShader.SetTexture(default, SHADER_CUBEMAP_TEXTURE_PROPERTY, cubemapFaceTexture);
-                cubemapComputeShader.SetInt(SHADER_CUBEMAP_FACE_ID_PROPERTY, cubemapFaceID);
 
-                var dispatchYield = WaveFrontUtils.DispatchYield
-                (
-                    computeShader: cubemapComputeShader,
-                    bufferSize: math.int3(cubemapTexture.width, cubemapTexture.height, cubemapTexture.volumeDepth)
-                );
-                while (dispatchYield.MoveNext()) yield return default;
+                globalSettings.CubemapShader.SetValues(SHADER_CUBEMAP_FACE_TEXTURE_PROPERTY, cubemapFaceTexture);
+                globalSettings.CubemapShader.SetValues(SHADER_CUBEMAP_FACE_INDEX_PROPERTY, cubemapFaceIndex);
+
+                var dispatchOperation = new DispatchComputeShader(globalSettings.CubemapShader, cubemapTexture.GetSize());
+                if (dispatchOperation is null)
+                {
+                    Debug.LogError($"({nameof(dispatchOperation)}) is not valid");
+                    yield break;
+                }
+
+                while (dispatchOperation.MoveNext()) yield return default;
 
                 Graphics.CopyTexture
                 (
@@ -136,7 +136,7 @@ namespace Wiwiwuwuwa.CloudsVolume
                     srcElement: default,
                     srcMip: default,
                     dst: cubemapTexture,
-                    dstElement: cubemapFaceID,
+                    dstElement: cubemapFaceIndex,
                     dstMip: default
                 );
 
@@ -145,6 +145,6 @@ namespace Wiwiwuwuwa.CloudsVolume
             }
         }
 
-        // ----------------------------------------------------
+        // ------------------------------------------------
     }
 }

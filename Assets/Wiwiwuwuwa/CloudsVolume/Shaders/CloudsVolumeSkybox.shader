@@ -1,18 +1,33 @@
-Shader "Wiwiwuwuwa/CloudsVolume/Skybox"
+Shader "Wiwiwuwuwa/Clouds Volume/Skybox"
 {
     Properties
     {
         [NoScaleOffset]
         _SkyboxTexture ("Skybox Texture", Cube) = "black" {}
 
-        [HDR]
-        _SkyGradientLower ("Sky Gradient Lower", Color) = (0.455, 0.529, 0.604, 1.000)
+        _BentNormalScale ("Bent Normal Scale", Float) = 256.0
 
-        [HDR]
-        _SkyGradientUpper ("Sky Gradient Upper", Color) = (0.078, 0.109, 0.200, 1.000)
+        _BentNormalPower ("Bent Normal Power", Float) = 20.0
 
-        [HDR]
-        _CloudsAmbient ("Clouds Ambient", Color) = (0.039, 0.054, 0.100, 1.000)
+        _GradientPoint0 ("Gradient Point 0", Float) = 0.0
+
+        _GradientValue0 ("Gradient Value 0", Color) = (0.8509804, 0.7215686, 0.682353, 1.0) // #D9B8AE
+
+        _GradientPoint1 ("Gradient Point 1", Float) = 0.5
+
+        _GradientValue1 ("Gradient Value 1", Color) = (0.4509804, 0.6000001, 0.7490196, 1.0) // #7399BF
+
+        _GradientPoint2 ("Gradient Point 2", Float) = 1.0
+
+        _GradientValue2 ("Gradient Value 2", Color) = (0.3803922, 0.3490196, 0.6980392, 1.0) // #6159B2
+
+        _AmbientPoint0 ("Ambient Point 0", Float) = 0.0
+
+        _AmbientValue0 ("Ambient Value 0", Color) = (0.1490196, 0.1607843, 0.2980392, 1.0) // #26294C
+
+        _AmbientPoint1 ("Ambient Point 1", Float) = 1.0
+
+        _AmbientValue1 ("Ambient Value 1", Color) = (0.4, 0.3568628, 0.3411765, 1.0) // #665B57
     }
 
     SubShader
@@ -42,9 +57,6 @@ Shader "Wiwiwuwuwa/CloudsVolume/Skybox"
             // --------------------------------------------
 
             #include "UnityCG.cginc"
-            #include "../../Utilities/Shaders/Library/GetFadeGradient.hlsl"
-            #include "../../Utilities/Shaders/Library/GetFogExp2.hlsl"
-            #include "../../Utilities/Shaders/Library/GetRemap.hlsl"
 
             // --------------------------------------------
 
@@ -68,15 +80,83 @@ Shader "Wiwiwuwuwa/CloudsVolume/Skybox"
 
             UNITY_DECLARE_TEXCUBE(_SkyboxTexture);
 
-            float4 _SunCol;
+            float _BentNormalScale;
 
-            float4 _SunDir;
+            float _BentNormalPower;
 
-            float3 _SkyGradientLower;
+            float _GradientPoint0;
 
-            float3 _SkyGradientUpper;
+            float3 _GradientValue0;
 
-            float3 _CloudsAmbient;
+            float _GradientPoint1;
+
+            float3 _GradientValue1;
+
+            float _GradientPoint2;
+
+            float3 _GradientValue2;
+
+            float _AmbientPoint0;
+
+            float3 _AmbientValue0;
+
+            float _AmbientPoint1;
+
+            float3 _AmbientValue1;
+
+            float3 _SunDir;
+
+            float3 _SunCol;
+
+            // --------------------------------------------
+
+            float3 GetGradientColor(float3 dirWS)
+            {
+                float3 gradientColor = 0.0;
+
+                const bool isInInterval0 = dirWS.y < _GradientPoint1;
+                const float3 colorOfInterval0 = lerp(_GradientValue0, _GradientValue1, smoothstep(_GradientPoint0, _GradientPoint1, dirWS.y));
+                gradientColor += isInInterval0 ? colorOfInterval0 : 0.0;
+
+                const bool isInInterval1 = dirWS.y >= _GradientPoint1;
+                const float3 colorOfInterval1 = lerp(_GradientValue1, _GradientValue2, smoothstep(_GradientPoint1, _GradientPoint2, dirWS.y));
+                gradientColor += isInInterval1 ? colorOfInterval1 : 0.0;
+
+                return gradientColor;
+            }
+
+            float3 GetAmbientColor(float3 dirWS)
+            {
+                return lerp(_AmbientValue0, _AmbientValue1, smoothstep(_AmbientPoint0, _AmbientPoint1, dirWS.y));
+            }
+
+            // --------------------------------------------
+
+            float4 GetCloudsColor(float3 dirWS)
+            {
+                const float4 cloudsData = UNITY_SAMPLE_TEXCUBE(_SkyboxTexture, dirWS);
+
+                const float3 cloudsNormal = mad(cloudsData.rgb, 2.0, -1.0);
+                const float cloudsAlpha = cloudsData.a;
+
+                float3 cloudsColor = 0.0;
+
+                float cloudsSunFactor = 0.0;
+                cloudsSunFactor = dot(cloudsNormal, -_SunDir);
+                cloudsSunFactor = mad(cloudsSunFactor, 0.5, 0.5);
+                cloudsSunFactor = _BentNormalScale * pow(cloudsSunFactor, _BentNormalPower);
+                cloudsSunFactor = cloudsSunFactor * rcp(cloudsSunFactor + 1.0);
+
+                cloudsColor += cloudsSunFactor * _SunCol;
+
+                float cloudsSkyFactor = 0.0;
+                cloudsSkyFactor = dot(cloudsNormal, float3(0.0, 1.0, 0.0));
+                cloudsSkyFactor = mad(cloudsSkyFactor, 0.5, 0.5);
+
+                cloudsColor += GetAmbientColor(cloudsSkyFactor);
+
+                return float4(cloudsColor, cloudsAlpha);
+            }
 
             // --------------------------------------------
 
@@ -91,22 +171,11 @@ Shader "Wiwiwuwuwa/CloudsVolume/Skybox"
             FragToData Frag(VertToFrag input)
             {
                 input.DirWS = normalize(input.DirWS);
+                const float4 cloudsColor = GetCloudsColor(input.DirWS);
 
-                const float1 airDelta = Wiwiw_GetFogExp2(2.5, Wiwiw_GetRemap(input.DirWS.y, -1.0, 1.0, 1.0, 0.0));
-                const float3 airColor = lerp(_SkyGradientLower, _SkyGradientUpper, airDelta.x);
-
-                const float1 sunDelta = Wiwiw_GetFadeGradient(Wiwiw_GetRemap(dot(input.DirWS, _SunDir.xyz), 0.9975, 1.0, 1.0, 0.0), 0.5, 1.0, 1.0, 0.0);
-                const float4 sunColor = float4(_SunCol.xyz, sunDelta.x);
-
-                const float4 cloudDelta = UNITY_SAMPLE_TEXCUBE(_SkyboxTexture, input.DirWS);
-                const float4 cloudColor = float4(_CloudsAmbient + cloudDelta.r * _SunCol.xyz, cloudDelta.g);
-                const float4 sunbmColor = float4(_SunCol.xyz, cloudDelta.b);
-
-                FragToData output = (FragToData)0;
-                output.Color = airColor;
-                output.Color = lerp(output.Color, sunColor.rgb, sunColor.a);
-                output.Color = lerp(output.Color, cloudColor.rgb, cloudColor.a);
-                output.Color = lerp(output.Color, sunbmColor.rgb, sunbmColor.a);
+                FragToData output = (FragToData)0.0;
+                output.Color = GetGradientColor(input.DirWS);
+                output.Color = lerp(output.Color, cloudsColor.rgb, cloudsColor.a);
                 return output;
             }
 

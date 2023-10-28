@@ -5,7 +5,7 @@ namespace Wiwiwuwuwa.Utilities
 {
     public abstract class ComputeOperation : IDisposable
     {
-        // ----------------------------------------------------
+        // ------------------------------------------------
 
         IEnumerator operation = default;
 
@@ -56,9 +56,14 @@ namespace Wiwiwuwuwa.Utilities
 
         protected void Defer(Action action)
         {
+            if (action is null)
+            {
+                return;
+            }
+
             disposion += action;
         }
 
-        // ----------------------------------------------------
+        // ------------------------------------------------
     }
 }

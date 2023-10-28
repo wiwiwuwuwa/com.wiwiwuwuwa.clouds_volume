@@ -1,16 +1,17 @@
 using System;
-using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
-using Unity.Mathematics;
 using UnityEditor;
+using Unity.Mathematics;
 
 namespace Wiwiwuwuwa.CloudsVolume
 {
     [ExecuteInEditMode]
     public class CloudsVolumeRenderer : MonoBehaviour
     {
-        // ----------------------------------------------------
+        // ------------------------------------------------
+
+        [Header("Global Settings")]
 
         [SerializeField]
         CloudsVolumeGlobalSettings globalSettings = default;
@@ -64,7 +65,7 @@ namespace Wiwiwuwuwa.CloudsVolume
             ShutSystems();
         }
 
-        // ----------------------------------------------------
+        // ------------------------------------------------
 
         void InitSystems()
         {
@@ -73,8 +74,6 @@ namespace Wiwiwuwuwa.CloudsVolume
             InitCubemapTexture();
             InitCookiesTexture();
             InitComputeOperation();
-            InitReflectionProbe();
-
             SyncRendererProperties();
         }
 
@@ -82,23 +81,22 @@ namespace Wiwiwuwuwa.CloudsVolume
         {
             TickComputeOperation();
             TickReflectionProbe();
-
             SyncRendererProperties();
         }
 
         void ShutSystems()
         {
-            ShutReflectionProbe();
+            SyncRendererProperties();
             ShutComputeOperation();
             ShutCookiesTexture();
             ShutCubemapTexture();
         }
 
-        // ----------------------------------------------------
+        // ------------------------------------------------
 
         RenderTexture cubemapTexture = default;
 
-        // --------------------------------
+        // ----------------------------
 
         void InitCubemapTexture()
         {
@@ -109,7 +107,7 @@ namespace Wiwiwuwuwa.CloudsVolume
                 return;
             }
 
-            cubemapTexture = RenderTexture.GetTemporary(new RenderTextureDescriptor
+            cubemapTexture = new RenderTexture(new RenderTextureDescriptor
             {
                 dimension = TextureDimension.Cube,
                 colorFormat = RenderTextureFormat.ARGB32,
@@ -119,7 +117,10 @@ namespace Wiwiwuwuwa.CloudsVolume
                 bindMS = false,
                 msaaSamples = 1,
                 enableRandomWrite = true,
-            });
+            })
+            {
+                name = "Clouds Volume Cubemap Texture",
+            };
 
             if (!cubemapTexture)
             {
@@ -137,14 +138,15 @@ namespace Wiwiwuwuwa.CloudsVolume
                 return;
             }
 
-            RenderTexture.ReleaseTemporary(cubemapTexture);
+            DestroyImmediate(cubemapTexture);
+            cubemapTexture = default;
         }
 
-        // ----------------------------------------------------
+        // ------------------------------------------------
 
         RenderTexture cookiesTexture = default;
 
-        // --------------------------------
+        // ----------------------------
 
         void InitCookiesTexture()
         {
@@ -155,7 +157,7 @@ namespace Wiwiwuwuwa.CloudsVolume
                 return;
             }
 
-            cookiesTexture = RenderTexture.GetTemporary(new RenderTextureDescriptor
+            cookiesTexture = new RenderTexture(new RenderTextureDescriptor
             {
                 dimension = TextureDimension.Tex2D,
                 colorFormat = RenderTextureFormat.ARGB32,
@@ -165,7 +167,10 @@ namespace Wiwiwuwuwa.CloudsVolume
                 bindMS = false,
                 msaaSamples = 1,
                 enableRandomWrite = true,
-            });
+            })
+            {
+                name = "Clouds Volume Cookies Texture",
+            };
 
             if (!cookiesTexture)
             {
@@ -173,7 +178,7 @@ namespace Wiwiwuwuwa.CloudsVolume
             }
 
             cookiesTexture.filterMode = FilterMode.Bilinear;
-            cookiesTexture.wrapMode = TextureWrapMode.Clamp;
+            cookiesTexture.wrapMode = TextureWrapMode.Repeat;
         }
 
         void ShutCookiesTexture()
@@ -183,14 +188,15 @@ namespace Wiwiwuwuwa.CloudsVolume
                 return;
             }
 
-            RenderTexture.ReleaseTemporary(cookiesTexture);
+            DestroyImmediate(cookiesTexture);
+            cookiesTexture = default;
         }
 
-        // ----------------------------------------------------
+        // ------------------------------------------------
 
         CloudsVolumeCompute computeOperation = default;
 
-        // --------------------------------
+        // ----------------------------
 
         void InitComputeOperation()
         {
@@ -202,6 +208,11 @@ namespace Wiwiwuwuwa.CloudsVolume
             }
 
             if (!cubemapTexture)
+            {
+                return;
+            }
+
+            if (!cookiesTexture)
             {
                 return;
             }
@@ -235,17 +246,22 @@ namespace Wiwiwuwuwa.CloudsVolume
             computeOperation = default;
         }
 
-        // ----------------------------------------------------
+        // ------------------------------------------------
 
+        [Header("Reflection Probe")]
+
+        [SerializeField]
         ReflectionProbe reflectionProbe = default;
 
-        // --------------------------------
+        // ----------------------------
 
-        void InitReflectionProbe()
-        {
-            ShutReflectionProbe();
-            reflectionProbe = GetComponent<ReflectionProbe>();
-        }
+        const string SHADER_SKYBOX_TEXTURE_PROPERTY = "_SkyboxTexture";
+
+        const string SHADER_SUN_DIR_PROPERTY = "_SunDir";
+
+        const string SHADER_SUN_COL_PROPERTY = "_SunCol";
+
+        // ----------------------------
 
         void TickReflectionProbe()
         {
@@ -257,20 +273,7 @@ namespace Wiwiwuwuwa.CloudsVolume
             reflectionProbe.RenderProbe();
         }
 
-        void ShutReflectionProbe()
-        {
-            reflectionProbe = default;
-        }
-
-        // ----------------------------------------------------
-
-        const string SHADER_SKYBOX_TEXTURE_PROPERTY = "_SkyboxTexture";
-
-        const string SHADER_SUN_COL_PROPERTY = "_SunCol";
-
-        const string SHADER_SUN_DIR_PROPERTY = "_SunDir";
-
-        // --------------------------------
+        // ------------------------------------------------
 
         void SyncRendererProperties()
         {
@@ -292,8 +295,8 @@ namespace Wiwiwuwuwa.CloudsVolume
             }
 
             skyboxMaterial.SetTexture(SHADER_SKYBOX_TEXTURE_PROPERTY, cubemapTexture);
-            skyboxMaterial.SetVector(SHADER_SUN_COL_PROPERTY, math.float4(CloudsVolumeEnvironment.GetSunColor(), default));
-            skyboxMaterial.SetVector(SHADER_SUN_DIR_PROPERTY, math.float4(-CloudsVolumeEnvironment.GetSunForwardVector(), default));
+            skyboxMaterial.SetVector(SHADER_SUN_DIR_PROPERTY, math.float4(CloudsVolumeObjects.SunDir, 0f));
+            skyboxMaterial.SetVector(SHADER_SUN_COL_PROPERTY, math.float4(CloudsVolumeObjects.SunCol, 1f));
             DynamicGI.UpdateEnvironment();
         }
 
@@ -304,15 +307,15 @@ namespace Wiwiwuwuwa.CloudsVolume
                 return;
             }
 
-            var sun = CloudsVolumeEnvironment.GetSunLightComponent();
-            if (!sun)
+            var sunLight = CloudsVolumeObjects.SunLight;
+            if (!sunLight)
             {
                 return;
             }
 
-            sun.cookie = cookiesTexture;
+            sunLight.cookie = cookiesTexture;
         }
 
-        // ----------------------------------------------------
+        // ------------------------------------------------
     }
 }

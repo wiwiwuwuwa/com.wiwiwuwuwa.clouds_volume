@@ -1,40 +1,34 @@
 using System.Collections;
 using UnityEngine;
-using Unity.Mathematics;
 using Wiwiwuwuwa.Utilities;
 
 namespace Wiwiwuwuwa.CloudsVolume
 {
     public class CloudsVolumeComputeCookies : ComputeOperation
     {
-        // ----------------------------------------------------
-
-        const string SHADER_SHADOWS_TEXTURE_PROPERTY = "_Wiwiw_ShadowsTexture";
+        // ------------------------------------------------
 
         const string SHADER_COOKIES_TEXTURE_PROPERTY = "_Wiwiw_CookiesTexture";
 
-        readonly CloudsVolumeGlobalSettings globalSettings = default;
+        // ----------------------------
 
-        readonly RenderTexture shadowsTexture = default;
+        readonly CloudsVolumeGlobalSettings globalSettings = default;
 
         readonly RenderTexture cookiesTexture = default;
 
-        // --------------------------------
+        // ----------------------------
 
-        public CloudsVolumeComputeCookies(CloudsVolumeGlobalSettings globalSettings, RenderTexture shadowsTexture, RenderTexture cookiesTexture)
+        public CloudsVolumeComputeCookies(CloudsVolumeGlobalSettings globalSettings, RenderTexture cookiesTexture)
         {
             this.globalSettings = globalSettings;
-            this.shadowsTexture = shadowsTexture;
             this.cookiesTexture = cookiesTexture;
         }
 
-        // --------------------------------
-
         protected override IEnumerator Execute()
         {
-            if (!shadowsTexture)
+            if (!globalSettings)
             {
-                Debug.LogError($"({nameof(shadowsTexture)}) is not valid");
+                Debug.LogError($"({nameof(globalSettings)}) is not valid");
                 yield break;
             }
 
@@ -44,24 +38,25 @@ namespace Wiwiwuwuwa.CloudsVolume
                 yield break;
             }
 
-            var cookiesComputeShader = globalSettings.CookiesComputeShader;
-            if (!cookiesComputeShader)
+            var cookiesShader = globalSettings.CookiesShader;
+            if (!cookiesShader)
             {
-                Debug.LogError($"({nameof(cookiesComputeShader)}) is not valid");
+                Debug.LogError($"({nameof(cookiesShader)}) is not valid");
                 yield break;
             }
 
-            cookiesComputeShader.SetTexture(default, SHADER_SHADOWS_TEXTURE_PROPERTY, shadowsTexture);
-            cookiesComputeShader.SetTexture(default, SHADER_COOKIES_TEXTURE_PROPERTY, cookiesTexture);
+            cookiesShader.SetTexture(default, SHADER_COOKIES_TEXTURE_PROPERTY, cookiesTexture);
 
-            var dispatchYield = WaveFrontUtils.DispatchYield
-            (
-                computeShader: cookiesComputeShader,
-                bufferSize: math.int3(cookiesTexture.width, cookiesTexture.height, cookiesTexture.volumeDepth)
-            );
-            while (dispatchYield.MoveNext()) yield return default;
+            var dispatchOperation = new DispatchComputeShader(cookiesShader, cookiesTexture.GetSize());
+            if (dispatchOperation is null)
+            {
+                Debug.LogError($"({nameof(dispatchOperation)}) is not valid");
+                yield break;
+            }
+
+            while (dispatchOperation.MoveNext()) yield return default;
         }
 
-        // ----------------------------------------------------
+        // ------------------------------------------------
     }
 }
