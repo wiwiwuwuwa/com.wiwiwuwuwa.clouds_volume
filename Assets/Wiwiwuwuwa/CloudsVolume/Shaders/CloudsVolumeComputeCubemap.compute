@@ -25,7 +25,7 @@ void CSMain(in uint3 id : SV_DispatchThreadID)
     const float3 viewPosWS = _Wiwiw_CameraPosition;
     const float3 viewDirWS = normalize(Wiwiw_Remap(Wiwiw_GetPointOnCubemap(coordInFace, _Wiwiw_CubemapFaceIndex), 0.0, 1.0, -1.0, 1.0));
 
-    _Wiwiw_CubemapFaceTexture[indexInFace] = float4(Wiwiw_LibClouds_IntegrateClouds(viewPosWS, viewDirWS), 0.0, 0.0, 0.0);
+    _Wiwiw_CubemapFaceTexture[indexInFace] = Wiwiw_LibClouds_IntegrateClouds(viewPosWS, viewDirWS);
 }
 
 // --------------------------------------------------------

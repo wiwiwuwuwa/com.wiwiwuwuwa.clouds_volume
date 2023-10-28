@@ -23,7 +23,7 @@ MonoBehaviour:
     z: 128
     w: 32
   densityContrast:
-    x: 0.75
+    x: 0.25
     y: 0.5
     z: 0.5
     w: 0.5
@@ -43,7 +43,7 @@ MonoBehaviour:
     z: 1
     w: 0
   cloudsHeightMin: 128
-  cloudsHeightMax: 256
-  cloudsSampleDensity: 0.01
+  cloudsHeightMax: 192
+  cloudsSampleDensity: 0.05
   cloudsSampleDistance: 256
   cloudsSampleNumber: 32

@@ -82,7 +82,11 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
+    - _AmbientColor: {r: 0.21181916, g: 0.2814542, b: 0.46226418, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _HorizonColor: {r: 0.538, g: 0.27697572, b: 0.38551387, a: 1}
+    - _SkyColor: {r: 0.709, g: 0.41760102, b: 0.41760102, a: 1}
+    - _SunColor: {r: 0.9056604, g: 0.12449779, b: 0.38363203, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

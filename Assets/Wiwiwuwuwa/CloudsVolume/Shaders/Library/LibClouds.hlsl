@@ -81,20 +81,12 @@ float Wiwiw_LibClouds_SampleGradientTexture(in float inPos)
 }
 
 // --------------------------------------------------------
-// Clouds Main
+// Clouds Density
 // --------------------------------------------------------
 
 float _Wiwiw_LibClouds_CloudsHeightMin;
 
 float _Wiwiw_LibClouds_CloudsHeightMax;
-
-float _Wiwiw_LibClouds_CloudsSampleStepDensity;
-
-float _Wiwiw_LibClouds_CloudsSampleFullDistance;
-
-float _Wiwiw_LibClouds_CloudsSampleNumberFlt;
-
-float _Wiwiw_LibClouds_CloudsSampleNumberRcp;
 
 // --------------------------------------------------------
 
@@ -110,6 +102,103 @@ float Wiwiw_LibClouds_SampleCloudsDensity(in float3 inPosWS)
 
     return result;
 }
+
+// --------------------------------------------------------
+// Bent Normals
+// --------------------------------------------------------
+
+static const float3 WIWIW_LIB_CLOUDS_BENT_NORMAL_SAMPLES[] =
+{
+    float3(0.125, 0.256, 0.111),
+    float3(-0.234, 0.456, -0.789),
+    float3(0.345, -0.567, 0.678),
+    float3(-0.456, -0.789, -0.123),
+    float3(0.567, 0.234, -0.890),
+    float3(-0.678, 0.901, 0.345),
+    float3(0.789, -0.012, -0.456),
+    float3(-0.901, -0.345, 0.567),
+    float3(0.234, 0.789, -0.456),
+    float3(-0.567, 0.123, 0.890),
+    float3(0.901, -0.678, -0.345),
+    float3(-0.012, -0.456, 0.789),
+    float3(0.345, 0.567, -0.234),
+    float3(-0.789, -0.123, 0.456),
+    float3(0.456, -0.789, -0.567),
+    float3(-0.678, 0.234, 0.901),
+    float3(0.567, 0.890, 0.012),
+    float3(-0.901, -0.345, -0.123),
+    float3(0.123, 0.456, 0.789),
+    float3(-0.456, 0.789, -0.012),
+    float3(0.678, -0.901, 0.345),
+    float3(-0.789, 0.012, -0.456),
+    float3(0.901, 0.345, 0.567),
+    float3(-0.234, -0.789, -0.456),
+    float3(0.567, -0.123, 0.890),
+    float3(-0.901, 0.678, -0.345),
+    float3(0.012, 0.456, 0.789),
+    float3(-0.345, -0.567, -0.234),
+    float3(0.789, 0.123, 0.456),
+    float3(-0.456, 0.789, -0.567),
+    float3(0.678, -0.234, 0.901),
+    float3(-0.567, -0.890, 0.012),
+    float3(0.901, 0.345, -0.123)
+};
+
+// --------------------------------------------------------
+
+float3 Wiwiw_LibClouds_SampleCloudsNormals(in float3 inPosWS)
+{
+    float3 result = 0.0;
+
+    for (uint i = 0; i < 8; i++)
+    {
+        const float3 samplePosWS = inPosWS + WIWIW_LIB_CLOUDS_BENT_NORMAL_SAMPLES[i] * 4.0;
+        const float sampleValWS = Wiwiw_LibClouds_SampleCloudsDensity(samplePosWS);
+
+        result += WIWIW_LIB_CLOUDS_BENT_NORMAL_SAMPLES[i] * (1.0 - sampleValWS);
+    }
+
+        for (uint i = 0; i < 8; i++)
+    {
+        const float3 samplePosWS = inPosWS + WIWIW_LIB_CLOUDS_BENT_NORMAL_SAMPLES[i] * 8.0;
+        const float sampleValWS = Wiwiw_LibClouds_SampleCloudsDensity(samplePosWS);
+
+        result += WIWIW_LIB_CLOUDS_BENT_NORMAL_SAMPLES[i] * (1.0 - sampleValWS);
+    }
+
+        for (uint i = 0; i < 8; i++)
+    {
+        const float3 samplePosWS = inPosWS + WIWIW_LIB_CLOUDS_BENT_NORMAL_SAMPLES[i] * 16.0;
+        const float sampleValWS = Wiwiw_LibClouds_SampleCloudsDensity(samplePosWS);
+
+        result += WIWIW_LIB_CLOUDS_BENT_NORMAL_SAMPLES[i] * (1.0 - sampleValWS);
+    }
+
+        for (uint i = 0; i < 8; i++)
+    {
+        const float3 samplePosWS = inPosWS + WIWIW_LIB_CLOUDS_BENT_NORMAL_SAMPLES[i] * 32.0;
+        const float sampleValWS = Wiwiw_LibClouds_SampleCloudsDensity(samplePosWS);
+
+        result += WIWIW_LIB_CLOUDS_BENT_NORMAL_SAMPLES[i] * (1.0 - sampleValWS);
+    }
+
+    return result * rcp(8.0 * 4.0);
+
+}
+
+// --------------------------------------------------------
+// Clouds Integration
+// --------------------------------------------------------
+
+float _Wiwiw_LibClouds_CloudsSampleStepDensity;
+
+float _Wiwiw_LibClouds_CloudsSampleFullDistance;
+
+float _Wiwiw_LibClouds_CloudsSampleNumberFlt;
+
+float _Wiwiw_LibClouds_CloudsSampleNumberRcp;
+
+// --------------------------------------------------------
 
 void Wiwiw_GetIntegrateCloudsInterval(in float3 inPosWS, in float3 inDirWS, out float3 outStartPosWS, out float3 outFinalPosWS)
 {
@@ -131,32 +220,34 @@ void Wiwiw_GetIntegrateCloudsInterval(in float3 inPosWS, in float3 inDirWS, out 
     const float3 nearestSamplePosWS = lowerIntersectTimeWS < upperIntersectTimeWS ? lowerIntersectPosWS : upperIntersectPosWS;
     isValid = (isValid) && (!Wiwiw_IsNan(nearestSamplePosWS));
 
-    // outStartPosWS = isValid ? nearestSamplePosWS : defaultSamplePosWS;
-    // outFinalPosWS = outStartPosWS + inDirWS * _Wiwiw_LibClouds_CloudsSampleFullDistance;
-
     outFinalPosWS = isValid ? nearestSamplePosWS : defaultSamplePosWS;
     outStartPosWS = outFinalPosWS + inDirWS * _Wiwiw_LibClouds_CloudsSampleFullDistance;
 }
 
 // --------------------------------------------------------
 
-float Wiwiw_LibClouds_IntegrateClouds(in float3 inPosWS, in float3 inDirWS)
+float4 Wiwiw_LibClouds_IntegrateClouds(in float3 inPosWS, in float3 inDirWS)
 {
     float3 sampleStartPosWS = 0.0;
     float3 sampleFinalPosWS = 0.0;
     Wiwiw_GetIntegrateCloudsInterval(inPosWS, inDirWS, sampleStartPosWS, sampleFinalPosWS);
 
-    float light = 1.0;
+    float3 color = 0.0;
+    float alpha = 1.0;
 
     for (float i = 0.0; i < _Wiwiw_LibClouds_CloudsSampleNumberFlt; i++)
     {
         const float3 samplePosWS = lerp(sampleStartPosWS, sampleFinalPosWS, i * _Wiwiw_LibClouds_CloudsSampleNumberRcp);
-        const float sampleValWS = Wiwiw_LibClouds_SampleCloudsDensity(samplePosWS);
+        const float3 sampleColorValWS = Wiwiw_LibClouds_SampleCloudsNormals(samplePosWS);
+        const float sampleAlphaValWS = Wiwiw_LibClouds_SampleCloudsDensity(samplePosWS);
 
-        light *= exp(-sampleValWS * _Wiwiw_LibClouds_CloudsSampleStepDensity);
+        const float fogFactor = exp(-sampleAlphaValWS * _Wiwiw_LibClouds_CloudsSampleStepDensity);
+
+        color = lerp(sampleColorValWS, color, fogFactor);
+        alpha = lerp(0.0, alpha, fogFactor);
     }
 
-    return 1.0 - light;
+    return float4(mad(color, 0.5, 0.5), 1.0 - alpha);
 }
 
 // --------------------------------------------------------
