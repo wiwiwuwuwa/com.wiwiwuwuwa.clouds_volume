@@ -35,10 +35,10 @@ namespace Wiwiwuwuwa.CloudsVolume
         float4 densityScale = math.float4(4096f, 512f, 128f, 32f);
 
         [SerializeField]
-        float4 densityContrast = math.float4(0.666f);
+        float4 densityContrast = math.float4(0.25f, 0.5f, 0.5f, 0.5f);
 
         [SerializeField]
-        float4 densityMidpoint = math.float4(0.25f);
+        float4 densityMidpoint = math.float4(0.75f, 0.25f, 0.25f, 0.25f);
 
         [Header("Gradient Texture Settings")]
 

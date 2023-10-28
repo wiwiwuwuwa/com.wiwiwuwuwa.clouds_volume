@@ -5,29 +5,29 @@ Shader "Wiwiwuwuwa/Clouds Volume/Skybox"
         [NoScaleOffset]
         _SkyboxTexture ("Skybox Texture", Cube) = "black" {}
 
-        _BentNormalScale ("Bent Normal Scale", Float) = 128.0
+        _BentNormalScale ("Bent Normal Scale", Float) = 256.0
 
-        _BentNormalPower ("Bent Normal Power", Float) = 12.0
+        _BentNormalPower ("Bent Normal Power", Float) = 20.0
 
         _GradientPoint0 ("Gradient Point 0", Float) = 0.0
 
-        _GradientValue0 ("Gradient Value 0", Color) = (0.03921569, 0.1254902, 0.2666667, 1.0) // #0A2044
+        _GradientValue0 ("Gradient Value 0", Color) = (0.8509804, 0.7215686, 0.682353, 1.0) // #D9B8AE
 
         _GradientPoint1 ("Gradient Point 1", Float) = 0.5
 
-        _GradientValue1 ("Gradient Value 1", Color) = (0.03137255, 0.2901961, 0.7450981, 1.0) // #084ABE
+        _GradientValue1 ("Gradient Value 1", Color) = (0.4509804, 0.6000001, 0.7490196, 1.0) // #7399BF
 
         _GradientPoint2 ("Gradient Point 2", Float) = 1.0
 
-        _GradientValue2 ("Gradient Value 2", Color) = (0.0, 0.2313726, 0.7372549, 1.0) // #003DBC
+        _GradientValue2 ("Gradient Value 2", Color) = (0.3803922, 0.3490196, 0.6980392, 1.0) // #6159B2
 
-        _AmbientPoint0 ("Ambient Point 0", Float) = 0.00
+        _AmbientPoint0 ("Ambient Point 0", Float) = 0.0
 
-        _AmbientValue0 ("Ambient Value 0", Color) = (0.0, 0.0, 0.0, 1.0) // #000000
+        _AmbientValue0 ("Ambient Value 0", Color) = (0.1490196, 0.1607843, 0.2980392, 1.0) // #26294C
 
-        _AmbientPoint1 ("Ambient Point 1", Float) = 0.25
+        _AmbientPoint1 ("Ambient Point 1", Float) = 1.0
 
-        _AmbientValue1 ("Ambient Value 1", Color) = (0.03921569, 0.1254902, 0.2666667, 1.0) // #0A2044
+        _AmbientValue1 ("Ambient Value 1", Color) = (0.4, 0.3568628, 0.3411765, 1.0) // #665B57
     }
 
     SubShader

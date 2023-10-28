@@ -23,42 +23,6 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _BumpMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _DetailAlbedoMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _DetailMask:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _DetailNormalMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _EmissionMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _MainTex:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _MetallicGlossMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _OcclusionMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _ParallaxMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _SkyboxTexture:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -67,44 +31,16 @@ Material:
     m_Floats:
     - _AmbientPoint0: 0
     - _AmbientPoint1: 1
-    - _BentNormalPower: 12
-    - _BentNormalScale: 128
-    - _BumpScale: 1
-    - _Cutoff: 0.5
-    - _DetailNormalMapScale: 1
-    - _DstBlend: 0
-    - _GlossMapScale: 1
-    - _Glossiness: 0.5
-    - _GlossyReflections: 1
+    - _BentNormalPower: 20
+    - _BentNormalScale: 256
     - _GradientPoint0: 0
     - _GradientPoint1: 0.5
     - _GradientPoint2: 1
-    - _GradientPoint3: 1
-    - _Metallic: 0
-    - _Mode: 0
-    - _OcclusionStrength: 1
-    - _Parallax: 0.02
-    - _SmoothnessTextureChannel: 0
-    - _SpecularHighlights: 1
-    - _SrcBlend: 1
-    - _UVSec: 0
-    - _ZWrite: 1
     m_Colors:
-    - _AmbientColor: {r: 0.30870077, g: 0.2690968, b: 0.8018868, a: 1}
-    - _AmbientValue0: {r: 0, g: 0, b: 0, a: 1}
-    - _AmbientValue1: {r: 0.039215688, g: 0.1254902, b: 0.26666668, a: 1}
-    - _CloudsAmbient: {r: 0.3490566, g: 0.3490566, b: 0.3490566, a: 1}
-    - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _GradientLower: {r: 0.26415092, g: 0.26415092, b: 0.26415092, a: 1}
-    - _GradientMidst: {r: 1, g: 1, b: 1, a: 1}
-    - _GradientUpper: {r: 0.4528302, g: 0.4528302, b: 0.4528302, a: 1}
-    - _GradientValue0: {r: 0.039215688, g: 0.1254902, b: 0.26666668, a: 1}
-    - _GradientValue1: {r: 0.03137255, g: 0.2901961, b: 0.74509805, a: 1}
-    - _GradientValue2: {r: 0, g: 0.23921569, b: 0.7372549, a: 1}
-    - _GradientValue3: {r: 0.16070794, g: 0.4160513, b: 0.754717, a: 1}
-    - _HorizonColor: {r: 0.538, g: 0.27697572, b: 0.38551387, a: 1}
-    - _SkyColor: {r: 0.709, g: 0.41760102, b: 0.41760102, a: 1}
-    - _SunColor: {r: 0.9056604, g: 0.12449779, b: 0.38363203, a: 1}
+    - _AmbientValue0: {r: 0.14901957, g: 0.16078427, b: 0.29803917, a: 1}
+    - _AmbientValue1: {r: 0.39999998, g: 0.35686278, b: 0.34117648, a: 1}
+    - _GradientValue0: {r: 0.8509804, g: 0.7215686, b: 0.682353, a: 1}
+    - _GradientValue1: {r: 0.45098037, g: 0.6000001, b: 0.7490196, a: 1}
+    - _GradientValue2: {r: 0.38039213, g: 0.34901956, b: 0.6980392, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
