@@ -23,6 +23,41 @@ namespace Wiwiwuwuwa.CloudsVolume
             }
         }
 
+        public static float3 SunDir
+        {
+            get
+            {
+                var sunTransform = SunTransform;
+                if (!sunTransform)
+                {
+                    Debug.LogError($"({nameof(sunTransform)}) is not valid");
+                    return default;
+                }
+
+                return sunTransform.forward;
+            }
+        }
+
+        public static float3 SunCol
+        {
+            get
+            {
+                var sunLight = SunLight;
+                if (!sunLight)
+                {
+                    Debug.LogError($"({nameof(sunLight)}) is not valid");
+                    return default;
+                }
+
+                var sunColor = sunLight.color.linear * sunLight.intensity;
+                sunColor = sunLight.useColorTemperature ? sunColor * Mathf.CorrelatedColorTemperatureToRGB(sunLight.colorTemperature).linear : sunColor;
+
+                return math.float3(sunColor.r, sunColor.g, sunColor.b);
+            }
+        }
+
+        // ------------------------------------------------
+
         public static Transform EyeTransform
         {
             get

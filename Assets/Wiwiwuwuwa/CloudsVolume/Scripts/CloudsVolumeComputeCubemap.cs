@@ -29,6 +29,8 @@ namespace Wiwiwuwuwa.CloudsVolume
 
         const string SHADER_LIB_CLOUDS_CLOUDS_HEIGHT_MAX_PROPERTY = "_Wiwiw_LibClouds_CloudsHeightMax";
 
+        const string SHADER_LIB_CLOUDS_BENT_NORMAL_SCALE_PROPERTY = "_Wiwiw_LibClouds_BentNormalScale";
+
         const string SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_STEP_DENSITY_PROPERTY = "_Wiwiw_LibClouds_CloudsSampleStepDensity";
 
         const string SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_FULL_DISTANCE_PROPERTY = "_Wiwiw_LibClouds_CloudsSampleFullDistance";
@@ -87,6 +89,7 @@ namespace Wiwiwuwuwa.CloudsVolume
             globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_GRADIENT_COLORS_PROPERTY, globalSettings.GradientColors);
             globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_HEIGHT_MIN_PROPERTY, globalSettings.CloudsHeightMin);
             globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_HEIGHT_MAX_PROPERTY, globalSettings.CloudsHeightMax);
+            globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_BENT_NORMAL_SCALE_PROPERTY, globalSettings.BentNormalScale);
             globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_STEP_DENSITY_PROPERTY, globalSettings.CloudsSampleStepDensity);
             globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_FULL_DISTANCE_PROPERTY, globalSettings.CloudsSampleFullDistance);
             globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_NUMBER_FLT_PROPERTY, globalSettings.CloudsSampleNumberFlt);

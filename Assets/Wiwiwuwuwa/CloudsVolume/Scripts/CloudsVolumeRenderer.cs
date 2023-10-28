@@ -2,6 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEditor;
+using Unity.Mathematics;
 
 namespace Wiwiwuwuwa.CloudsVolume
 {
@@ -256,6 +257,10 @@ namespace Wiwiwuwuwa.CloudsVolume
 
         const string SHADER_SKYBOX_TEXTURE_PROPERTY = "_SkyboxTexture";
 
+        const string SHADER_SUN_DIR_PROPERTY = "_SunDir";
+
+        const string SHADER_SUN_COL_PROPERTY = "_SunCol";
+
         // ----------------------------
 
         void TickReflectionProbe()
@@ -290,6 +295,8 @@ namespace Wiwiwuwuwa.CloudsVolume
             }
 
             skyboxMaterial.SetTexture(SHADER_SKYBOX_TEXTURE_PROPERTY, cubemapTexture);
+            skyboxMaterial.SetVector(SHADER_SUN_DIR_PROPERTY, math.float4(CloudsVolumeObjects.SunDir, 0f));
+            skyboxMaterial.SetVector(SHADER_SUN_COL_PROPERTY, math.float4(CloudsVolumeObjects.SunCol, 1f));
             DynamicGI.UpdateEnvironment();
         }
 

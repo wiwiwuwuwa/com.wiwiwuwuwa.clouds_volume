@@ -26,38 +26,45 @@ namespace Wiwiwuwuwa.CloudsVolume
         [SerializeField]
         int cookiesTextureSize = 512;
 
-        [Header("Clouds Density Settings")]
+        [Header("Density Texture Settings")]
 
         [SerializeField]
         Texture3D densityTexture = default;
 
         [SerializeField]
-        float4 densityScale = math.float4(1f);
+        float4 densityScale = math.float4(4096f, 512f, 128f, 32f);
 
         [SerializeField]
-        float4 densityContrast = math.float4(0.5f);
+        float4 densityContrast = math.float4(0.666f);
 
         [SerializeField]
-        float4 densityMidpoint = math.float4(0.5f);
+        float4 densityMidpoint = math.float4(0.25f);
 
-        [Header("Clouds Gradient Settings")]
+        [Header("Gradient Texture Settings")]
 
         [SerializeField]
-        float4 gradientPoints = math.float4(0f, 0.1f, 0.1f, 1f);
+        float4 gradientPoints = math.float4(0f, 0.25f, 0.5f, 1f);
 
         [SerializeField]
         float4 gradientColors = math.float4(0f, 1f, 1f, 0f);
 
-        [Header("Clouds Main Settings")]
+        [Header("Clouds Density Settings")]
 
         [SerializeField]
         float cloudsHeightMin = 128f;
 
         [SerializeField]
-        float cloudsHeightMax = 160f;
+        float cloudsHeightMax = 192f;
+
+        [Header("Bent Normals Settings")]
 
         [SerializeField]
-        float cloudsSampleDensity = 1f;
+        float bentNormalScale = 32f;
+
+        [Header("Clouds Integration Settings")]
+
+        [SerializeField]
+        float cloudsSampleDensity = 0.05f;
 
         [SerializeField]
         float cloudsSampleDistance = 256f;
@@ -92,6 +99,8 @@ namespace Wiwiwuwuwa.CloudsVolume
         public float CloudsHeightMin => cloudsHeightMin;
 
         public float CloudsHeightMax => cloudsHeightMax;
+
+        public float BentNormalScale => bentNormalScale;
 
         public float CloudsSampleStepDensity => cloudsSampleDensity * cloudsSampleDistance * math.rcp(cloudsSampleNumber);
 

@@ -28,7 +28,7 @@ MonoBehaviour:
     z: 0.5
     w: 0.5
   densityMidpoint:
-    x: 0.25
+    x: 0.75
     y: 0.25
     z: 0.25
     w: 0.25
@@ -44,6 +44,7 @@ MonoBehaviour:
     w: 0
   cloudsHeightMin: 128
   cloudsHeightMax: 192
+  bentNormalScale: 32
   cloudsSampleDensity: 0.05
   cloudsSampleDistance: 256
   cloudsSampleNumber: 32
