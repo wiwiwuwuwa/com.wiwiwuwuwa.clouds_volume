@@ -5,8 +5,7 @@
 For all the elites in the gaming world, this is the tech that fuels the skies of **Anturned**. Witness it in action [here](https://t.me/anturned).
 
 <p align="center">
-  <img src="Promo/CloudsVolume0.png" width="360">
-  <img src="Promo/CloudsVolume1.png" width="360">
+  <img src="Promo/CloudsVolume2.png" width="720">
 </p>
 
 ## Features
