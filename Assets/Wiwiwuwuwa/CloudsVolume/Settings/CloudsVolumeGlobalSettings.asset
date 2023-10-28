@@ -16,7 +16,7 @@ MonoBehaviour:
   cubemapTextureSize: 512
   cookiesShader: {fileID: 7200000, guid: 5f1c685d3c06ac146adcc012ba9012ca, type: 3}
   cookiesTextureSize: 512
-  densityTexture: {fileID: 11700000, guid: ae3cc47d39f37bb418cc658c145281c2, type: 2}
+  densityTexture: {fileID: 11700000, guid: b0379b10e0627f7408ac54aa5d1c0ca5, type: 2}
   densityScale:
     x: 4096
     y: 512
