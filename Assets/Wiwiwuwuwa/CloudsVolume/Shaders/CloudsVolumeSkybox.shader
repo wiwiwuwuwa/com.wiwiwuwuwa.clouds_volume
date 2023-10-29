@@ -3,7 +3,7 @@ Shader "Wiwiwuwuwa/Clouds Volume/Skybox"
     Properties
     {
         [NoScaleOffset]
-        _SkyboxTexture ("Skybox Texture", Cube) = "black" {}
+        _SkyboxTexture ("Skybox Texture", 2DArray) = "black" {}
 
         _BentNormalScale ("Bent Normal Scale", Float) = 256.0
 
@@ -57,6 +57,7 @@ Shader "Wiwiwuwuwa/Clouds Volume/Skybox"
             // --------------------------------------------
 
             #include "UnityCG.cginc"
+            #include "../../Utilities/Shaders/Library/LibCommon.hlsl"
 
             // --------------------------------------------
 
@@ -78,7 +79,9 @@ Shader "Wiwiwuwuwa/Clouds Volume/Skybox"
 
             // --------------------------------------------
 
-            UNITY_DECLARE_TEXCUBE(_SkyboxTexture);
+            Texture2DArray _SkyboxTexture;
+
+            SamplerState sampler_SkyboxTexture;
 
             float _BentNormalScale;
 
@@ -134,7 +137,7 @@ Shader "Wiwiwuwuwa/Clouds Volume/Skybox"
 
             float4 GetCloudsColor(float3 dirWS)
             {
-                const float4 cloudsData = UNITY_SAMPLE_TEXCUBE(_SkyboxTexture, dirWS);
+                const float4 cloudsData = Wiwiw_SampleCubemap(_SkyboxTexture, sampler_SkyboxTexture, dirWS);
 
                 const float3 cloudsNormal = mad(cloudsData.rgb, 2.0, -1.0);
                 const float cloudsAlpha = cloudsData.a;

@@ -8,9 +8,7 @@
 
 // --------------------------------------------------------
 
-RWTexture2D<float4> _Wiwiw_CubemapFaceTexture;
-
-int _Wiwiw_CubemapFaceIndex;
+RWTexture2DArray<float4> _Wiwiw_CubemapTexture;
 
 float3 _Wiwiw_CameraPosition;
 
@@ -19,13 +17,13 @@ float3 _Wiwiw_CameraPosition;
 WIWIW_NUMTHREADS
 void CSMain(in uint3 id : SV_DispatchThreadID)
 {
-    const uint2 indexInFace = Wiwiw_GetThreadIndex3D(id).xy;
-    const float2 coordInFace = Wiwiw_Remap(Wiwiw_GetThreadCoord3D(id).xy, float2(0.0, 0.0), float2(1.0, 1.0), float2(0.0, 1.0), float2(1.0, 0.0));
+    const uint3 indexInCubemap = Wiwiw_GetThreadIndex3D(id);
+    const float2 coordInCubemap = Wiwiw_GetThreadCoord3D(id).xy;
 
     const float3 viewPosWS = _Wiwiw_CameraPosition;
-    const float3 viewDirWS = normalize(Wiwiw_Remap(Wiwiw_GetPointOnCubemap(coordInFace, _Wiwiw_CubemapFaceIndex), 0.0, 1.0, -1.0, 1.0));
+    const float3 viewDirWS = normalize(Wiwiw_Remap(Wiwiw_GetPointOnCubemap(coordInCubemap, indexInCubemap.z), 0.0, 1.0, -1.0, 1.0));
 
-    _Wiwiw_CubemapFaceTexture[indexInFace] = Wiwiw_LibClouds_IntegrateClouds(viewPosWS, viewDirWS);
+    _Wiwiw_CubemapTexture[indexInCubemap] = Wiwiw_LibClouds_IntegrateClouds(viewPosWS, viewDirWS);
 }
 
 // --------------------------------------------------------

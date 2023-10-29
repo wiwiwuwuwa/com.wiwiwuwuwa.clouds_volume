@@ -109,11 +109,11 @@ namespace Wiwiwuwuwa.CloudsVolume
 
             cubemapTexture = new RenderTexture(new RenderTextureDescriptor
             {
-                dimension = TextureDimension.Cube,
+                dimension = TextureDimension.Tex2DArray,
                 colorFormat = RenderTextureFormat.ARGB32,
                 width = globalSettings.CubemapTextureSize,
                 height = globalSettings.CubemapTextureSize,
-                volumeDepth = 1,
+                volumeDepth = 6,
                 bindMS = false,
                 msaaSamples = 1,
                 enableRandomWrite = true,

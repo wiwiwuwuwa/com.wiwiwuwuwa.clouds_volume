@@ -103,6 +103,34 @@ float4 Wiwiw_Remap(in float4 inX, in float4 inOldMin, in float4 inOldMax, in flo
     return lerp(inNewMin, inNewMax, Wiwiw_InverseLerp(inOldMin, inOldMax, inX));
 }
 
+float4 Wiwiw_SampleCubemap(in Texture2DArray inCubemap, in SamplerState inSampler, in float3 inDir)
+{
+    const float absX = abs(inDir.x);
+    const float absY = abs(inDir.y);
+    const float absZ = abs(inDir.z);
+
+    float2 uv = 0.0;
+    float id = 0.0;
+
+    const bool isAxisX = (absX >= absY && absX >= absZ);
+    uv = isAxisX ? inDir.zy * rcp(absX) : uv;
+    id = isAxisX ? (inDir.x >= 0.0 ? 0.0 : 1.0) : id;
+
+    const bool isAxisY = (absY >= absX && absY >= absZ);
+    uv = isAxisY ? inDir.xz * rcp(absY) : uv;
+    id = isAxisY ? (inDir.y >= 0.0 ? 2.0 : 3.0) : id;
+
+    const bool isAxisZ = (absZ >= absX && absZ >= absY);
+    uv = isAxisZ ? inDir.xy * rcp(absZ) : uv;
+    id = isAxisZ ? (inDir.z >= 0.0 ? 4.0 : 5.0) : id;
+
+    uv.x = (id == 0.0 || id == 5.0) ? -uv.x : uv.x;
+    uv.y = (id == 2.0) ? -uv.y : uv.y;
+
+    uv = Wiwiw_Remap(uv, -1.0, 1.0, 0.0, 1.0);
+    return inCubemap.Sample(inSampler, float3(uv, id));
+}
+
 // --------------------------------------------------------
 
 #endif // WIWIW_LIB_COMMON_INCLUDED

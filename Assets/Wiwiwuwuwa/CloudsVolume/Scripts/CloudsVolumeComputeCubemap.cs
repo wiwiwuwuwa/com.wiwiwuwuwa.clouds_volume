@@ -9,9 +9,9 @@ namespace Wiwiwuwuwa.CloudsVolume
     {
         // ------------------------------------------------
 
-        const string SHADER_CUBEMAP_FACE_TEXTURE_PROPERTY = "_Wiwiw_CubemapFaceTexture";
+        const string SHADER_CUBEMAP_TEXTURE_PROPERTY = "_Wiwiw_CubemapTexture";
 
-        const string SHADER_CUBEMAP_FACE_INDEX_PROPERTY = "_Wiwiw_CubemapFaceIndex";
+        const string SHADER_CAMERA_POSITION_PROPERTY = "_Wiwiw_CameraPosition";
 
         const string SHADER_LIB_CLOUDS_DENSITY_TEXTURE_PROPERTY = "_Wiwiw_LibClouds_DensityTexture";
 
@@ -38,8 +38,6 @@ namespace Wiwiwuwuwa.CloudsVolume
         const string SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_NUMBER_FLT_PROPERTY = "_Wiwiw_LibClouds_CloudsSampleNumberFlt";
 
         const string SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_NUMBER_RCP_PROPERTY = "_Wiwiw_LibClouds_CloudsSampleNumberRcp";
-
-        const string SHADER_CAMERA_POSITION_PROPERTY = "_Wiwiw_CameraPosition";
 
         // ----------------------------
 
@@ -81,6 +79,8 @@ namespace Wiwiwuwuwa.CloudsVolume
                 yield break;
             }
 
+            globalSettings.CubemapShader.SetValues(SHADER_CUBEMAP_TEXTURE_PROPERTY, cubemapTexture);
+            globalSettings.CubemapShader.SetValues(SHADER_CAMERA_POSITION_PROPERTY, CloudsVolumeObjects.CameraPosition);
             globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_DENSITY_TEXTURE_PROPERTY, globalSettings.DensityTexture);
             globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_DENSITY_MULTIPLY_PROPERTY, globalSettings.DensityMultiply);
             globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_DENSITY_CONTRAST_PROPERTY, globalSettings.DensityContrast);
@@ -94,55 +94,15 @@ namespace Wiwiwuwuwa.CloudsVolume
             globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_FULL_DISTANCE_PROPERTY, globalSettings.CloudsSampleFullDistance);
             globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_NUMBER_FLT_PROPERTY, globalSettings.CloudsSampleNumberFlt);
             globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_CLOUDS_SAMPLE_NUMBER_RCP_PROPERTY, globalSettings.CloudsSampleNumberRcp);
-            globalSettings.CubemapShader.SetValues(SHADER_CAMERA_POSITION_PROPERTY, CloudsVolumeObjects.CameraPosition);
 
-            for (var cubemapFaceIndex = 0; cubemapFaceIndex < 6; cubemapFaceIndex++)
+            var dispatchOperation = new DispatchComputeShader(globalSettings.CubemapShader, cubemapTexture.GetSize());
+            if (dispatchOperation is null)
             {
-                var cubemapFaceTexture = RenderTexture.GetTemporary(new RenderTextureDescriptor
-                {
-                    dimension = TextureDimension.Tex2D,
-                    colorFormat = cubemapTexture.format,
-                    width = cubemapTexture.width,
-                    height = cubemapTexture.height,
-                    volumeDepth = 1,
-                    bindMS = false,
-                    msaaSamples = 1,
-                    enableRandomWrite = true,
-                });
-
-                if (!cubemapFaceTexture)
-                {
-                    Debug.LogError($"({nameof(cubemapFaceTexture)}) is not valid");
-                    yield break;
-                }
-
-                Defer(() => RenderTexture.ReleaseTemporary(cubemapFaceTexture));
-
-                globalSettings.CubemapShader.SetValues(SHADER_CUBEMAP_FACE_TEXTURE_PROPERTY, cubemapFaceTexture);
-                globalSettings.CubemapShader.SetValues(SHADER_CUBEMAP_FACE_INDEX_PROPERTY, cubemapFaceIndex);
-
-                var dispatchOperation = new DispatchComputeShader(globalSettings.CubemapShader, cubemapTexture.GetSize());
-                if (dispatchOperation is null)
-                {
-                    Debug.LogError($"({nameof(dispatchOperation)}) is not valid");
-                    yield break;
-                }
-
-                while (dispatchOperation.MoveNext()) yield return default;
-
-                Graphics.CopyTexture
-                (
-                    src: cubemapFaceTexture,
-                    srcElement: default,
-                    srcMip: default,
-                    dst: cubemapTexture,
-                    dstElement: cubemapFaceIndex,
-                    dstMip: default
-                );
-
-                RenderTexture.ReleaseTemporary(cubemapFaceTexture);
-                yield return default;
+                Debug.LogError($"({nameof(dispatchOperation)}) is not valid");
+                yield break;
             }
+
+            while (dispatchOperation.MoveNext()) yield return default;
         }
 
         // ------------------------------------------------
