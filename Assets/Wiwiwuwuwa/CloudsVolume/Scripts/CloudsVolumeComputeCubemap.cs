@@ -80,7 +80,7 @@ namespace Wiwiwuwuwa.CloudsVolume
             }
 
             globalSettings.CubemapShader.SetValues(SHADER_CUBEMAP_TEXTURE_PROPERTY, cubemapTexture);
-            globalSettings.CubemapShader.SetValues(SHADER_CAMERA_POSITION_PROPERTY, CloudsVolumeObjects.CameraPosition);
+            globalSettings.CubemapShader.SetValues(SHADER_CAMERA_POSITION_PROPERTY, globalSettings.IsCameraRelative ? CloudsVolumeObjects.CameraPosition : default);
             globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_DENSITY_TEXTURE_PROPERTY, globalSettings.DensityTexture);
             globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_DENSITY_MULTIPLY_PROPERTY, globalSettings.DensityMultiply);
             globalSettings.CubemapShader.SetValues(SHADER_LIB_CLOUDS_DENSITY_CONTRAST_PROPERTY, globalSettings.DensityContrast);

@@ -45,6 +45,7 @@ MonoBehaviour:
   cloudsHeightMin: 128
   cloudsHeightMax: 192
   bentNormalScale: 32
+  isCameraRelative: 1
   cloudsSampleDensity: 0.05
   cloudsSampleDistance: 256
   cloudsSampleNumber: 32

@@ -64,6 +64,9 @@ namespace Wiwiwuwuwa.CloudsVolume
         [Header("Clouds Integration Settings")]
 
         [SerializeField]
+        bool isCameraRelative = true;
+
+        [SerializeField]
         float cloudsSampleDensity = 0.05f;
 
         [SerializeField]
@@ -101,6 +104,8 @@ namespace Wiwiwuwuwa.CloudsVolume
         public float CloudsHeightMax => cloudsHeightMax;
 
         public float BentNormalScale => bentNormalScale;
+
+        public bool IsCameraRelative => isCameraRelative;
 
         public float CloudsSampleStepDensity => cloudsSampleDensity * cloudsSampleDistance * math.rcp(cloudsSampleNumber);
 
