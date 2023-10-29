@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Skybox
+  m_Name: Skybox_70Warm
   m_Shader: {fileID: 4800000, guid: 4b30e04de265f6c479946f7e306e141b, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -37,10 +37,10 @@ Material:
     - _GradientPoint1: 0.5
     - _GradientPoint2: 1
     m_Colors:
-    - _AmbientValue0: {r: 0.14901957, g: 0.16078427, b: 0.29803917, a: 1}
-    - _AmbientValue1: {r: 0.39999998, g: 0.35686278, b: 0.34117648, a: 1}
-    - _GradientValue0: {r: 0.8509804, g: 0.7215686, b: 0.682353, a: 1}
-    - _GradientValue1: {r: 0.45098037, g: 0.6000001, b: 0.7490196, a: 1}
-    - _GradientValue2: {r: 0.38039213, g: 0.34901956, b: 0.6980392, a: 1}
+    - _AmbientValue0: {r: 0.16862746, g: 0.16470589, b: 0.2, a: 1}
+    - _AmbientValue1: {r: 0.45882353, g: 0.3372549, b: 0.2627451, a: 1}
+    - _GradientValue0: {r: 0.91764706, g: 0.827451, b: 0.54509807, a: 1}
+    - _GradientValue1: {r: 0.7058824, g: 0.7058824, b: 0.53333336, a: 1}
+    - _GradientValue2: {r: 0.6666667, g: 0.5058824, b: 0.50980395, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
