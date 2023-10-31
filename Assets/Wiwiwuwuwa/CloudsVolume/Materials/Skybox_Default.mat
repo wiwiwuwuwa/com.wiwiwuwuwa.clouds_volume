@@ -22,25 +22,23 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs:
-    - _SkyboxTexture:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
+    m_TexEnvs: []
     m_Ints: []
     m_Floats:
     - _AmbientPoint0: 0
     - _AmbientPoint1: 1
     - _BentNormalPower: 10
     - _BentNormalScale: 20
-    - _GradientPoint0: 0
-    - _GradientPoint1: 0.5
-    - _GradientPoint2: 1
+    - _GradientPoint0: -0.05
+    - _GradientPoint1: 0
+    - _GradientPoint2: 0.5
+    - _GradientPoint3: 1
     m_Colors:
     - _AmbientValue0: {r: 0.14901957, g: 0.16078427, b: 0.29803917, a: 1}
     - _AmbientValue1: {r: 0.39999998, g: 0.35686278, b: 0.34117648, a: 1}
-    - _GradientValue0: {r: 0.8509804, g: 0.7215686, b: 0.682353, a: 1}
-    - _GradientValue1: {r: 0.45098037, g: 0.6000001, b: 0.7490196, a: 1}
-    - _GradientValue2: {r: 0.38039213, g: 0.34901956, b: 0.6980392, a: 1}
+    - _GradientValue0: {r: 0.35686275, g: 0.27450982, b: 0.3254902, a: 1}
+    - _GradientValue1: {r: 0.8509804, g: 0.7215686, b: 0.682353, a: 1}
+    - _GradientValue2: {r: 0.45098037, g: 0.6000001, b: 0.7490196, a: 1}
+    - _GradientValue3: {r: 0.38039213, g: 0.34901956, b: 0.6980392, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

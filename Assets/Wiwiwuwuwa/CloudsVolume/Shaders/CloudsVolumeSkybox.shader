@@ -2,24 +2,34 @@ Shader "Wiwiwuwuwa/Clouds Volume/Skybox"
 {
     Properties
     {
-        [NoScaleOffset]
-        _SkyboxTexture ("Skybox Texture", 2DArray) = "black" {}
+        [Header(Bent Normal Params)]
+        [Space]
 
         _BentNormalScale ("Bent Normal Scale", Float) = 20.0
 
         _BentNormalPower ("Bent Normal Power", Float) = 10.0
 
-        _GradientPoint0 ("Gradient Point 0", Float) = 0.0
+        [Header(Gradient Params)]
+        [Space]
 
-        _GradientValue0 ("Gradient Value 0", Color) = (0.8509804, 0.7215686, 0.682353, 1.0) // #D9B8AE
+        _GradientPoint0 ("Gradient Point 0", Float) = -0.05
 
-        _GradientPoint1 ("Gradient Point 1", Float) = 0.5
+        _GradientValue0 ("Gradient Value 0", Color) = (0.3568628, 0.2745098, 0.3254902, 1.0) // #5B4653
 
-        _GradientValue1 ("Gradient Value 1", Color) = (0.4509804, 0.6000001, 0.7490196, 1.0) // #7399BF
+        _GradientPoint1 ("Gradient Point 1", Float) = 0.0
 
-        _GradientPoint2 ("Gradient Point 2", Float) = 1.0
+        _GradientValue1 ("Gradient Value 1", Color) = (0.8509804, 0.7215686, 0.682353, 1.0) // #D9B8AE
 
-        _GradientValue2 ("Gradient Value 2", Color) = (0.3803922, 0.3490196, 0.6980392, 1.0) // #6159B2
+        _GradientPoint2 ("Gradient Point 2", Float) = 0.5
+
+        _GradientValue2 ("Gradient Value 2", Color) = (0.4509804, 0.6000001, 0.7490196, 1.0) // #7399BF
+
+        _GradientPoint3 ("Gradient Point 3", Float) = 1.0
+
+        _GradientValue3 ("Gradient Value 3", Color) = (0.3803922, 0.3490196, 0.6980392, 1.0) // #6159B2
+
+        [Header(Ambient Params)]
+        [Space]
 
         _AmbientPoint0 ("Ambient Point 0", Float) = 0.0
 
@@ -99,6 +109,10 @@ Shader "Wiwiwuwuwa/Clouds Volume/Skybox"
 
             float3 _GradientValue2;
 
+            float _GradientPoint3;
+
+            float3 _GradientValue3;
+
             float _AmbientPoint0;
 
             float3 _AmbientValue0;
@@ -121,9 +135,13 @@ Shader "Wiwiwuwuwa/Clouds Volume/Skybox"
                 const float3 colorOfInterval0 = lerp(_GradientValue0, _GradientValue1, smoothstep(_GradientPoint0, _GradientPoint1, dirWS.y));
                 gradientColor += isInInterval0 ? colorOfInterval0 : 0.0;
 
-                const bool isInInterval1 = dirWS.y >= _GradientPoint1;
+                const bool isInInterval1 = dirWS.y >= _GradientPoint1 && dirWS.y < _GradientPoint2;
                 const float3 colorOfInterval1 = lerp(_GradientValue1, _GradientValue2, smoothstep(_GradientPoint1, _GradientPoint2, dirWS.y));
                 gradientColor += isInInterval1 ? colorOfInterval1 : 0.0;
+
+                const bool isInInterval2 = dirWS.y >= _GradientPoint2;
+                const float3 colorOfInterval2 = lerp(_GradientValue2, _GradientValue3, smoothstep(_GradientPoint2, _GradientPoint3, dirWS.y));
+                gradientColor += isInInterval2 ? colorOfInterval2 : 0.0;
 
                 return gradientColor;
             }
