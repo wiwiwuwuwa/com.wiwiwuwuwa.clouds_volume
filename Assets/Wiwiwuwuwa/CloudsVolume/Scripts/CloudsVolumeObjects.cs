@@ -77,20 +77,14 @@ namespace Wiwiwuwuwa.CloudsVolume
         {
             get
             {
-                var eyeCameraForEditMode = EyeCameraForEditMode;
-                if (eyeCameraForEditMode)
+                if (Application.isPlaying)
                 {
-                    return eyeCameraForEditMode;
+                    return EyeCameraForPlayMode;
                 }
-
-                var eyeCameraForPlayMode = EyeCameraForPlayMode;
-                if (eyeCameraForPlayMode)
+                else
                 {
-                    return eyeCameraForPlayMode;
+                    return EyeCameraForEditMode;
                 }
-
-                Debug.LogError($"({nameof(eyeCameraForEditMode)}) and ({nameof(eyeCameraForPlayMode)}) are not valid");
-                return default;
             }
         }
 
