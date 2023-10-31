@@ -5,9 +5,9 @@ Shader "Wiwiwuwuwa/Clouds Volume/Skybox"
         [NoScaleOffset]
         _SkyboxTexture ("Skybox Texture", 2DArray) = "black" {}
 
-        _BentNormalScale ("Bent Normal Scale", Float) = 256.0
+        _BentNormalScale ("Bent Normal Scale", Float) = 20.0
 
-        _BentNormalPower ("Bent Normal Power", Float) = 20.0
+        _BentNormalPower ("Bent Normal Power", Float) = 10.0
 
         _GradientPoint0 ("Gradient Point 0", Float) = 0.0
 

@@ -4,17 +4,28 @@
 // --------------------------------------------------------
 
 #include "../../Utilities/Shaders/Library/LibCompute.hlsl"
+#include "Library/LibClouds.hlsl"
 
 // --------------------------------------------------------
 
 RWTexture2D<float4> _Wiwiw_CookiesTexture;
+
+float4x4 _Wiwiw_CookiePositionMatrix;
+
+float4x4 _Wiwiw_CookieRotationMatrix;
 
 // --------------------------------------------------------
 
 WIWIW_NUMTHREADS
 void CSMain(in uint3 id : SV_DispatchThreadID)
 {
+    const uint2 indexInTexture = Wiwiw_GetThreadIndex3D(id).xy;
+    const float2 coordInTexture = Wiwiw_GetThreadCoord3D(id).xy;
 
+    const float3 sunPosWS = mul(_Wiwiw_CookiePositionMatrix, float4(coordInTexture, 0.0, 1.0)).xyz;
+    const float3 sunDirWS = mul(_Wiwiw_CookieRotationMatrix, float4(0.0, 0.0, 1.0, 0.0)).xyz;
+
+    _Wiwiw_CookiesTexture[indexInTexture] = Wiwiw_LibClouds_IntegrateCookie(sunPosWS, sunDirWS);
 }
 
 // --------------------------------------------------------

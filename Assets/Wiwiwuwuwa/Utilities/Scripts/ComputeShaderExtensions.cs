@@ -175,6 +175,12 @@ namespace Wiwiwuwuwa.Utilities
                 return;
             }
 
+            if (string.IsNullOrEmpty(name))
+            {
+                Debug.Log($"({nameof(name)}) is not valid");
+                return;
+            }
+
             if (values is null || values.Length == default)
             {
                 Debug.LogError($"({nameof(values)}) is not valid");
@@ -192,6 +198,12 @@ namespace Wiwiwuwuwa.Utilities
                 return;
             }
 
+            if (string.IsNullOrEmpty(name))
+            {
+                Debug.Log($"({nameof(name)}) is not valid");
+                return;
+            }
+
             if (values is null || values.Length == default)
             {
                 Debug.LogError($"({nameof(values)}) is not valid");
@@ -206,6 +218,12 @@ namespace Wiwiwuwuwa.Utilities
             if (!shader)
             {
                 Debug.LogError($"({nameof(shader)}) is not valid");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(name))
+            {
+                Debug.Log($"({nameof(name)}) is not valid");
                 return;
             }
 
@@ -249,6 +267,12 @@ namespace Wiwiwuwuwa.Utilities
                 return;
             }
 
+            if (string.IsNullOrEmpty(name))
+            {
+                Debug.Log($"({nameof(name)}) is not valid");
+                return;
+            }
+
             if (values is null || values.Length == default)
             {
                 Debug.LogError($"({nameof(values)}) is not valid");
@@ -263,6 +287,12 @@ namespace Wiwiwuwuwa.Utilities
             if (!shader)
             {
                 Debug.LogError($"({nameof(shader)}) is not valid");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(name))
+            {
+                Debug.Log($"({nameof(name)}) is not valid");
                 return;
             }
 
@@ -283,6 +313,12 @@ namespace Wiwiwuwuwa.Utilities
                 return;
             }
 
+            if (string.IsNullOrEmpty(name))
+            {
+                Debug.Log($"({nameof(name)}) is not valid");
+                return;
+            }
+
             if (values is null || values.Length == default)
             {
                 Debug.LogError($"({nameof(values)}) is not valid");
@@ -290,6 +326,23 @@ namespace Wiwiwuwuwa.Utilities
             }
 
             shader.SetInts(name, values.SelectMany(v => new[] { v.x, v.y, v.z, v.w }).ToArray());
+        }
+
+        public static void SetValues(this ComputeShader shader, string name, float4x4 value)
+        {
+            if (!shader)
+            {
+                Debug.LogError($"({nameof(shader)}) is not valid");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(name))
+            {
+                Debug.Log($"({nameof(name)}) is not valid");
+                return;
+            }
+
+            shader.SetMatrix(name, value);
         }
 
         public static void SetValues(this ComputeShader shader, string name, Texture value)

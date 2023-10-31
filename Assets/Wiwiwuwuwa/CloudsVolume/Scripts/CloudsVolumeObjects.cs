@@ -56,6 +56,57 @@ namespace Wiwiwuwuwa.CloudsVolume
             }
         }
 
+        public static float4x4 CookiePositionMatrix
+        {
+            get
+            {
+                var sunLight = SunLight;
+                if (!sunLight)
+                {
+                    Debug.LogError($"({nameof(sunLight)}) is not valid");
+                    return default;
+                }
+
+                var sunTransform = SunTransform;
+                if (!sunTransform)
+                {
+                    Debug.LogError($"({nameof(sunTransform)}) is not valid");
+                    return default;
+                }
+
+                var matrix = float4x4.identity;
+                matrix = math.mul(float4x4.Translate(-0.5f), matrix);
+                matrix = math.mul(float4x4.Scale(sunLight.cookieSize), matrix);
+                matrix = math.mul(float4x4.LookAt(default, sunTransform.forward, sunTransform.up), matrix);
+                matrix = math.mul(float4x4.Translate(sunTransform.position), matrix);
+                return matrix;
+            }
+        }
+
+        public static float4x4 CookieRotationMatrix
+        {
+            get
+            {
+                var sunLight = SunLight;
+                if (!sunLight)
+                {
+                    Debug.LogError($"({nameof(sunLight)}) is not valid");
+                    return default;
+                }
+
+                var sunTransform = SunTransform;
+                if (!sunTransform)
+                {
+                    Debug.LogError($"({nameof(sunTransform)}) is not valid");
+                    return default;
+                }
+
+                var matrix = float4x4.identity;
+                matrix = math.mul(float4x4.LookAt(default, sunTransform.forward, sunTransform.up), matrix);
+                return matrix;
+            }
+        }
+
         // ------------------------------------------------
 
         public static Transform EyeTransform

@@ -31,8 +31,8 @@ Material:
     m_Floats:
     - _AmbientPoint0: 0
     - _AmbientPoint1: 1
-    - _BentNormalPower: 20
-    - _BentNormalScale: 256
+    - _BentNormalPower: 10
+    - _BentNormalScale: 20
     - _GradientPoint0: 0
     - _GradientPoint1: 0.5
     - _GradientPoint2: 1

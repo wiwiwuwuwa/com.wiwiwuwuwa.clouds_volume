@@ -67,7 +67,7 @@ namespace Wiwiwuwuwa.CloudsVolume
         bool isCameraRelative = true;
 
         [SerializeField]
-        float cloudsSampleDensity = 0.05f;
+        float cloudsSampleDensity = 0.0375f;
 
         [SerializeField]
         float cloudsSampleDistance = 256f;

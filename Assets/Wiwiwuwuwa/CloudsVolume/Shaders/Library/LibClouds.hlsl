@@ -184,7 +184,7 @@ float _Wiwiw_LibClouds_CloudsSampleNumberRcp;
 
 // --------------------------------------------------------
 
-void Wiwiw_GetIntegrateCloudsInterval(in float3 inPosWS, in float3 inDirWS, out float3 outStartPosWS, out float3 outFinalPosWS)
+void Wiwiw_LibClouds_GetIntegrateCloudsInterval(in float3 inPosWS, in float3 inDirWS, out float3 outStartPosWS, out float3 outFinalPosWS)
 {
     bool isValid = true;
 
@@ -208,13 +208,34 @@ void Wiwiw_GetIntegrateCloudsInterval(in float3 inPosWS, in float3 inDirWS, out 
     outStartPosWS = outFinalPosWS + inDirWS * _Wiwiw_LibClouds_CloudsSampleFullDistance;
 }
 
+void Wiwiw_LibClouds_GetIntegrateCookieInterval(in float3 inPosWS, in float3 inDirWS, out float3 outStartPosWS, out float3 outFinalPosWS)
+{
+    bool isValid = true;
+
+    const float lowerPlanePosWS = _Wiwiw_LibClouds_CloudsHeightMin;
+    const float upperPlanePosWS = _Wiwiw_LibClouds_CloudsHeightMax;
+
+    const float3 lowerIntersectPosWS = Wiwiw_GetRayIntersectPlaneY(inPosWS, inDirWS, lowerPlanePosWS);
+    const float3 upperIntersectPosWS = Wiwiw_GetRayIntersectPlaneY(inPosWS, inDirWS, upperPlanePosWS);
+    isValid = (isValid) && (!Wiwiw_IsNan(lowerIntersectPosWS) && !Wiwiw_IsNan(upperIntersectPosWS));
+
+    const float lowerIntersectTimeWS = Wiwiw_GetRayTime(inPosWS, inDirWS, lowerIntersectPosWS);
+    const float upperIntersectTimeWS = Wiwiw_GetRayTime(inPosWS, inDirWS, upperIntersectPosWS);
+
+    const float3 startSamplePosWS = lowerIntersectTimeWS < upperIntersectTimeWS ? lowerIntersectPosWS : upperIntersectPosWS;
+    const float3 finalSamplePosWS = lowerIntersectTimeWS < upperIntersectTimeWS ? upperIntersectPosWS : lowerIntersectPosWS;
+
+    outStartPosWS = isValid ? startSamplePosWS : Wiwiw_GetNan();
+    outFinalPosWS = isValid ? finalSamplePosWS : Wiwiw_GetNan();
+}
+
 // --------------------------------------------------------
 
 float4 Wiwiw_LibClouds_IntegrateClouds(in float3 inPosWS, in float3 inDirWS)
 {
     float3 sampleStartPosWS = 0.0;
     float3 sampleFinalPosWS = 0.0;
-    Wiwiw_GetIntegrateCloudsInterval(inPosWS, inDirWS, sampleStartPosWS, sampleFinalPosWS);
+    Wiwiw_LibClouds_GetIntegrateCloudsInterval(inPosWS, inDirWS, sampleStartPosWS, sampleFinalPosWS);
 
     float3 color = 0.0;
     float alpha = 1.0;
@@ -235,6 +256,29 @@ float4 Wiwiw_LibClouds_IntegrateClouds(in float3 inPosWS, in float3 inDirWS)
     alpha = 1.0 - alpha;
 
     return float4(color, alpha);
+}
+
+float Wiwiw_LibClouds_IntegrateCookie(in float3 inPosWS, in float3 inDirWS)
+{
+    bool isValid = true;
+
+    float3 sampleStartPosWS = 0.0;
+    float3 sampleFinalPosWS = 0.0;
+    Wiwiw_LibClouds_GetIntegrateCookieInterval(inPosWS, inDirWS, sampleStartPosWS, sampleFinalPosWS);
+    isValid = (isValid) && (!Wiwiw_IsNan(sampleStartPosWS) && !Wiwiw_IsNan(sampleFinalPosWS));
+
+    float alpha = 1.0;
+
+    for (float i = 0.0; i < _Wiwiw_LibClouds_CloudsSampleNumberFlt; i++)
+    {
+        const float3 samplePosWS = lerp(sampleStartPosWS, sampleFinalPosWS, i * _Wiwiw_LibClouds_CloudsSampleNumberRcp);
+        const float sampleValWS = Wiwiw_LibClouds_SampleCloudsDensity(samplePosWS);
+
+        const float fogFactor = exp(-sampleValWS * _Wiwiw_LibClouds_CloudsSampleStepDensity);
+        alpha = lerp(0.0, alpha, fogFactor);
+    }
+
+    return alpha;
 }
 
 // --------------------------------------------------------
