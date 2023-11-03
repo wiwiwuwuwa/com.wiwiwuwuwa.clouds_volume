@@ -5,6 +5,10 @@
 // Math
 // --------------------------------------------------------
 
+static const float WIWIW_PI = 3.1415926535897932384626433832795;
+
+// --------------------------------------------------------
+
 float Wiwiw_BlendOverlay(in float inColorA, in float inColorB)
 {
     return (inColorA < 0.5) ? (2.0 * inColorA * inColorB) : (1.0 - 2.0 * (1.0 - inColorA) * (1.0 - inColorB));
@@ -103,6 +107,34 @@ float4 Wiwiw_Remap(in float4 inX, in float4 inOldMin, in float4 inOldMax, in flo
     return lerp(inNewMin, inNewMax, Wiwiw_InverseLerp(inOldMin, inOldMax, inX));
 }
 
+float3 Wiwiw_SpheremapToCubemapUV(in float2 inCoord)
+{
+    const float2 remappedCoord = Wiwiw_Remap(inCoord, 0.0, 1.0, -1.0, 1.0);
+    const float theta = atan2(remappedCoord.y, remappedCoord.x);
+    const float radius = length(remappedCoord);
+    const float phi = radius * WIWIW_PI * 0.5;
+    const float sinPhi = sin(phi);
+
+    float3 dir3D = 0.0;
+    dir3D.x = sinPhi * cos(theta);
+    dir3D.y = cos(phi);
+    dir3D.z = sinPhi * sin(theta);
+    return dir3D;
+}
+
+float2 Wiwiw_CubemapToSpheremapUV(in float3 dir3D)
+{
+    const float phi = acos(dir3D.y);
+    const float theta = atan2(dir3D.z, dir3D.x);
+    const float radius = phi * rcp(WIWIW_PI * 0.5);
+
+    float2 remappedCoord = 0.0;
+    remappedCoord.x = radius * cos(theta);
+    remappedCoord.y = radius * sin(theta);
+    remappedCoord = Wiwiw_Remap(remappedCoord, -1.0, 1.0, 0.0, 1.0);
+    return remappedCoord;
+}
+
 float4 Wiwiw_SampleCubemap(in Texture2DArray inCubemap, in SamplerState inSampler, in float3 inDir)
 {
     const float absX = abs(inDir.x);
@@ -128,7 +160,12 @@ float4 Wiwiw_SampleCubemap(in Texture2DArray inCubemap, in SamplerState inSample
     uv.y = (id == 2.0) ? -uv.y : uv.y;
 
     uv = Wiwiw_Remap(uv, -1.0, 1.0, 0.0, 1.0);
-    return inCubemap.Sample(inSampler, float3(uv, id));
+    return inCubemap.SampleLevel(inSampler, float3(uv, id), 0.0);
+}
+
+float4 Wiwiw_SampleSpheremap(in Texture2D inSpheremap, in SamplerState inSampler, in float3 inDir)
+{
+    return inSpheremap.SampleLevel(inSampler, Wiwiw_CubemapToSpheremapUV(inDir), 0.0);
 }
 
 // --------------------------------------------------------

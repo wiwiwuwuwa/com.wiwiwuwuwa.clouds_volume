@@ -2,6 +2,15 @@ Shader "Wiwiwuwuwa/Clouds Volume/Skybox"
 {
     Properties
     {
+        [Header(Textures)]
+        [Space]
+
+        _SkyboxTexture ("Skybox Texture", 2DArray) = "black" {}
+
+        _StabilityTexture ("Stability Texture", 2D) = "black" {}
+
+        _TextureBlending ("Texture Blending", Float) = 0.0
+
         [Header(Bent Normal Params)]
         [Space]
 
@@ -67,7 +76,7 @@ Shader "Wiwiwuwuwa/Clouds Volume/Skybox"
             // --------------------------------------------
 
             #include "UnityCG.cginc"
-            #include "../../Utilities/Shaders/Library/LibCommon.hlsl"
+            #include "Library/LibSky.hlsl"
 
             // --------------------------------------------
 
@@ -89,98 +98,6 @@ Shader "Wiwiwuwuwa/Clouds Volume/Skybox"
 
             // --------------------------------------------
 
-            Texture2DArray _SkyboxTexture;
-
-            SamplerState sampler_SkyboxTexture;
-
-            float _BentNormalScale;
-
-            float _BentNormalPower;
-
-            float _GradientPoint0;
-
-            float3 _GradientValue0;
-
-            float _GradientPoint1;
-
-            float3 _GradientValue1;
-
-            float _GradientPoint2;
-
-            float3 _GradientValue2;
-
-            float _GradientPoint3;
-
-            float3 _GradientValue3;
-
-            float _AmbientPoint0;
-
-            float3 _AmbientValue0;
-
-            float _AmbientPoint1;
-
-            float3 _AmbientValue1;
-
-            float3 _SunDir;
-
-            float3 _SunCol;
-
-            // --------------------------------------------
-
-            float3 GetGradientColor(float3 dirWS)
-            {
-                float3 gradientColor = 0.0;
-
-                const bool isInInterval0 = dirWS.y < _GradientPoint1;
-                const float3 colorOfInterval0 = lerp(_GradientValue0, _GradientValue1, smoothstep(_GradientPoint0, _GradientPoint1, dirWS.y));
-                gradientColor += isInInterval0 ? colorOfInterval0 : 0.0;
-
-                const bool isInInterval1 = dirWS.y >= _GradientPoint1 && dirWS.y < _GradientPoint2;
-                const float3 colorOfInterval1 = lerp(_GradientValue1, _GradientValue2, smoothstep(_GradientPoint1, _GradientPoint2, dirWS.y));
-                gradientColor += isInInterval1 ? colorOfInterval1 : 0.0;
-
-                const bool isInInterval2 = dirWS.y >= _GradientPoint2;
-                const float3 colorOfInterval2 = lerp(_GradientValue2, _GradientValue3, smoothstep(_GradientPoint2, _GradientPoint3, dirWS.y));
-                gradientColor += isInInterval2 ? colorOfInterval2 : 0.0;
-
-                return gradientColor;
-            }
-
-            float3 GetAmbientColor(float3 dirWS)
-            {
-                return lerp(_AmbientValue0, _AmbientValue1, smoothstep(_AmbientPoint0, _AmbientPoint1, dirWS.y));
-            }
-
-            // --------------------------------------------
-
-            float4 GetCloudsColor(float3 dirWS)
-            {
-                const float4 cloudsData = Wiwiw_SampleCubemap(_SkyboxTexture, sampler_SkyboxTexture, dirWS);
-
-                const float3 cloudsNormal = mad(cloudsData.rgb, 2.0, -1.0);
-                const float cloudsAlpha = cloudsData.a;
-
-                float3 cloudsColor = 0.0;
-
-                float cloudsSunFactor = 0.0;
-                cloudsSunFactor = dot(cloudsNormal, -_SunDir);
-                cloudsSunFactor = mad(cloudsSunFactor, 0.5, 0.5);
-                cloudsSunFactor = _BentNormalScale * pow(cloudsSunFactor, _BentNormalPower);
-                cloudsSunFactor = cloudsSunFactor * rcp(cloudsSunFactor + 1.0);
-
-                cloudsColor += cloudsSunFactor * _SunCol;
-
-                float cloudsSkyFactor = 0.0;
-                cloudsSkyFactor = dot(cloudsNormal, float3(0.0, 1.0, 0.0));
-                cloudsSkyFactor = mad(cloudsSkyFactor, 0.5, 0.5);
-
-                cloudsColor += GetAmbientColor(cloudsSkyFactor);
-
-                return float4(cloudsColor, cloudsAlpha);
-            }
-
-            // --------------------------------------------
-
             VertToFrag Vert(DataToVert input)
             {
                 VertToFrag output = (VertToFrag)0;
@@ -191,12 +108,8 @@ Shader "Wiwiwuwuwa/Clouds Volume/Skybox"
 
             FragToData Frag(VertToFrag input)
             {
-                input.DirWS = normalize(input.DirWS);
-                const float4 cloudsColor = GetCloudsColor(input.DirWS);
-
                 FragToData output = (FragToData)0.0;
-                output.Color = GetGradientColor(input.DirWS);
-                output.Color = lerp(output.Color, cloudsColor.rgb, cloudsColor.a);
+                output.Color = GetSkyboxColor(normalize(input.DirWS));
                 return output;
             }
 

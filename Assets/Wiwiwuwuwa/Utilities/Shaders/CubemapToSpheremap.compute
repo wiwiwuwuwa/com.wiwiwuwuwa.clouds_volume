@@ -1,0 +1,25 @@
+#pragma kernel CSMain
+#pragma multi_compile_local WIWIW_WAVEFRONT_SIZE_16 WIWIW_WAVEFRONT_SIZE_32 WIWIW_WAVEFRONT_SIZE_64
+
+// --------------------------------------------------------
+
+#include "Assets/Wiwiwuwuwa/Utilities/Shaders/Library/LibCompute.hlsl"
+
+// --------------------------------------------------------
+
+Texture2DArray<float4> _CubemapTexture;
+SamplerState sampler_CubemapTexture;
+RWTexture2D<float4> _SpheremapTexture;
+
+// --------------------------------------------------------
+
+WIWIW_NUMTHREADS
+void CSMain(in uint3 id : SV_DispatchThreadID)
+{
+    const uint3 indexInSpheremap = Wiwiw_GetThreadIndex3D(id);
+    const float3 coordInSpheremap = Wiwiw_GetThreadCoord3D(id);
+    const float3 coordInCubemap = Wiwiw_SpheremapToCubemapUV(coordInSpheremap.xy);
+    _SpheremapTexture[indexInSpheremap.xy] = Wiwiw_SampleCubemap(_CubemapTexture, sampler_CubemapTexture, coordInCubemap);
+}
+
+// --------------------------------------------------------

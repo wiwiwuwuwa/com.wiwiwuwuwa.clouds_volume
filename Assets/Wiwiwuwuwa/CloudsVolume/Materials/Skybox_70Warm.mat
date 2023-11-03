@@ -22,7 +22,15 @@ Material:
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
-    m_TexEnvs: []
+    m_TexEnvs:
+    - _SkyboxTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _StabilityTexture:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _AmbientPoint0: 0
@@ -33,6 +41,7 @@ Material:
     - _GradientPoint1: 0
     - _GradientPoint2: 0.5
     - _GradientPoint3: 1
+    - _TextureBlending: 0
     m_Colors:
     - _AmbientValue0: {r: 0.16862746, g: 0.16470589, b: 0.2, a: 1}
     - _AmbientValue1: {r: 0.45882353, g: 0.3372549, b: 0.2627451, a: 1}

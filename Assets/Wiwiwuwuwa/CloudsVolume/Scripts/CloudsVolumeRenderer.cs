@@ -32,10 +32,6 @@ namespace Wiwiwuwuwa.CloudsVolume
 
             InitSystems();
 
-#if UNITY_EDITOR
-            EditorApplication.update += TickSystems;
-#endif
-
             if (globalSettings)
             {
                 cachedSettings = globalSettings;
@@ -43,12 +39,10 @@ namespace Wiwiwuwuwa.CloudsVolume
             }
         }
 
-#if !UNITY_EDITOR
         void Update()
         {
             TickSystems();
         }
-#endif
 
         void OnDisable()
         {
@@ -57,10 +51,6 @@ namespace Wiwiwuwuwa.CloudsVolume
                 cachedSettings.OnValidateEvent -= OnValidate;
                 cachedSettings = default;
             }
-
-#if UNITY_EDITOR
-            EditorApplication.update = (EditorApplication.CallbackFunction) Delegate.RemoveAll(EditorApplication.update, new EditorApplication.CallbackFunction(TickSystems));
-#endif
 
             ShutSystems();
         }

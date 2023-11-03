@@ -1,0 +1,27 @@
+#pragma kernel CSMain
+#pragma multi_compile_local WIWIW_WAVEFRONT_SIZE_16 WIWIW_WAVEFRONT_SIZE_32 WIWIW_WAVEFRONT_SIZE_64
+
+// --------------------------------------------------------
+
+#include "../../Utilities/Shaders/Library/LibCompute.hlsl"
+#include "Library/LibSky.hlsl"
+
+// --------------------------------------------------------
+
+RWTexture2D<float4> _MainTexture;
+
+// --------------------------------------------------------
+
+WIWIW_NUMTHREADS
+void CSMain(in uint3 id : SV_DispatchThreadID)
+{
+    const uint3 indexInTexture = Wiwiw_GetThreadIndex3D(id);
+    const float3 coordInTexture = Wiwiw_GetThreadCoord3D(id);
+
+    const float2 coordInSpheremap = coordInTexture.xy;
+    const float3 coordInCubemap = normalize(Wiwiw_SpheremapToCubemapUV(coordInSpheremap));
+
+    _MainTexture[indexInTexture.xy] = pow(float4(GetSkyboxColor(coordInCubemap), 1.0), 1.0);
+}
+
+// --------------------------------------------------------
